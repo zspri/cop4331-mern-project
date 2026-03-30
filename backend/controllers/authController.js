@@ -177,7 +177,6 @@ const resetPassword = async (req, res) => {
             .digest('hex');
 
         // Find user with valid token and check expiration
-        console.log("HASHED TOKEN:", hashedToken);
         const user = await User.findOne({
             resetPasswordToken: hashedToken,
             resetPasswordExpire: { $gt: Date.now() },
