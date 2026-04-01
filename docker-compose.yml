@@ -1,0 +1,9 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    image: mern/backend
+    network_mode: host
+    volumes:
+      - ./backend/.env:/app/.env:ro
+    restart: unless-stopped
