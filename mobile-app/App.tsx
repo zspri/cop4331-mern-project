@@ -1,20 +1,48 @@
 import React, { useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { LoginScreen } from "./src/screens/LoginScreen";
+import { RegisterScreen } from "./src/screens/RegisterScreen";
+import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
+import { ResetPasswordScreen } from "./src/screens/ResetPasswordScreen";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { NutritionScreen } from "./src/screens/NutritionScreen";
 import { WorkoutsScreen } from "./src/screens/WorkoutsScreen";
 import { colors } from "./src/theme/colors";
 
 type Tab = "dashboard" | "workouts" | "nutrition";
+type AuthScreen = "login" | "register" | "forgot" | "reset";
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const screen = useMemo(() => {
     if (tab === "workouts") return <WorkoutsScreen />;
     if (tab === "nutrition") return <NutritionScreen />;
     return <DashboardScreen />;
   }, [tab]);
+
+  if (!isAuthenticated) {
+    if (authScreen === "login") {
+      return (
+        <LoginScreen
+          onNavigate={setAuthScreen}
+          onLoginSuccess={() => setIsAuthenticated(true)}
+        />
+      );
+    }
+
+    if (authScreen === "register") {
+      return <RegisterScreen onNavigate={setAuthScreen} />;
+    }
+
+    if (authScreen === "forgot") {
+      return <ForgotPasswordScreen onNavigate={setAuthScreen} />;
+    }
+
+    return <ResetPasswordScreen onNavigate={setAuthScreen} />;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
