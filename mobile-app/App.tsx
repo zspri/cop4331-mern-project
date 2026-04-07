@@ -19,13 +19,21 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.appShell}>
-        <Text style={styles.brand}>MuscleMeter+</Text>
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            <Text style={styles.brand}>MuscleMeter+</Text>
+            <Text style={styles.tagline}>Train smarter. Recover better.</Text>
+          </View>
+        </View>
+
         <View style={styles.body}>{screen}</View>
 
         <View style={styles.nav}>
-          <TabButton label="Home" active={tab === "dashboard"} onPress={() => setTab("dashboard")} />
-          <TabButton label="Workouts" active={tab === "workouts"} onPress={() => setTab("workouts")} />
-          <TabButton label="Nutrition" active={tab === "nutrition"} onPress={() => setTab("nutrition")} />
+          <View style={styles.navContent}>
+            <TabButton label="Home" active={tab === "dashboard"} onPress={() => setTab("dashboard")} />
+            <TabButton label="Workouts" active={tab === "workouts"} onPress={() => setTab("workouts")} />
+            <TabButton label="Nutrition" active={tab === "nutrition"} onPress={() => setTab("nutrition")} />
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -52,40 +60,69 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg
   },
   appShell: {
-    flex: 1
+    flex: 1,
+    backgroundColor: colors.bg
+  },
+  header: {
+    paddingTop: 14,
+    paddingBottom: 10
+  },
+  headerContent: {
+    width: "100%",
+    maxWidth: 760,
+    alignSelf: "center",
+    alignItems: "center",
+    paddingHorizontal: 0
   },
   brand: {
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 4,
     color: colors.accent,
-    fontSize: 18,
-    fontWeight: "800"
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: -0.5
+  },
+  tagline: {
+    marginTop: 4,
+    color: colors.mutetext,
+    fontSize: 14,
+    fontWeight: "500"
   },
   body: {
-    flex: 1
+    flex: 1,
+    paddingBottom: 8
   },
   nav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
     backgroundColor: colors.card,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    padding: 8
+    paddingTop: 10,
+    paddingBottom: 14
+  },
+  navContent: {
+    width: "100%",
+    maxWidth: 760,
+    alignSelf: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 8
   },
   tabBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 10
+    flex: 1,
+    marginHorizontal: 6,
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: "center"
   },
   tabBtnActive: {
     backgroundColor: colors.accentSoft
   },
   tabLabel: {
     color: colors.mutetext,
+    fontSize: 15,
     fontWeight: "600"
   },
   tabLabelActive: {
-    color: colors.accent
+    color: colors.accent,
+    fontWeight: "700"
   }
 });

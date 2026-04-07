@@ -21,25 +21,29 @@ export function StatCard({ label, value, hint }: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.card,
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
     borderWidth: 1,
     borderColor: colors.border,
-    gap: 4
+    gap: 6,
   },
   label: {
     color: colors.mutetext,
     fontSize: 12,
+    fontWeight: "600",
     textTransform: "uppercase",
-    letterSpacing: 0.5
+    letterSpacing: 0.6
   },
   value: {
     color: colors.text,
-    fontSize: 22,
-    fontWeight: "700"
+    fontSize: 24,
+    fontWeight: "800",
+    lineHeight: 28
   },
   hint: {
     color: colors.mutetext,
-    fontSize: 12
+    fontSize: 13,
+    lineHeight: 18
   }
 });

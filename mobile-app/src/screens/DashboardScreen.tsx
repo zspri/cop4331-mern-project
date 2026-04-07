@@ -17,18 +17,20 @@ export function DashboardScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Welcome back, {user.name}</Text>
-      <Text style={styles.subheader}>Daily Snapshot</Text>
+      <View style={styles.content}>
+        <Text style={styles.header}>Welcome back, {user.name}</Text>
+        <Text style={styles.subheader}>Daily Snapshot</Text>
 
-      <View style={styles.grid}>
-        <StatCard label="Readiness" value={`${readiness}/100`} hint="Sleep + soreness + stress" />
-        <StatCard label="Workouts" value={`${todaysWorkouts.length}`} hint="Sessions completed today" />
-        <StatCard label="Protein" value={`${proteinToday}g`} hint={`Goal ${user.targetProteinG}g`} />
-      </View>
+        <View style={styles.grid}>
+          <StatCard label="Readiness" value={`${readiness}/100`} hint="Sleep + soreness + stress" />
+          <StatCard label="Workouts" value={`${todaysWorkouts.length}`} hint="Sessions completed today" />
+          <StatCard label="Protein" value={`${proteinToday}g`} hint={`Goal ${user.targetProteinG}g`} />
+        </View>
 
-      <View style={styles.coachCard}>
-        <Text style={styles.coachTitle}>AI Coach Tip</Text>
-        <Text style={styles.coachText}>{coachTip}</Text>
+        <View style={styles.coachCard}>
+          <Text style={styles.coachTitle}>AI Coach Tip</Text>
+          <Text style={styles.coachText}>{coachTip}</Text>
+        </View>
       </View>
     </ScrollView>
   );
@@ -36,9 +38,16 @@ export function DashboardScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    gap: 14,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 24,
     backgroundColor: colors.bg
+  },
+  content: {
+    width: "100%",
+    maxWidth: 760,
+    alignSelf: "center",
+    gap: 14
   },
   header: {
     marginTop: 8,
@@ -47,29 +56,32 @@ const styles = StyleSheet.create({
     color: colors.text
   },
   subheader: {
-    fontSize: 14,
+    marginTop: -4,
+    fontSize: 15,
     color: colors.mutetext
   },
   grid: {
-    gap: 10
+    gap: 12
   },
   coachCard: {
     backgroundColor: colors.accentSoft,
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 18,
+    padding: 18,
     borderWidth: 1,
-    borderColor: "#99F6E4"
+    borderColor: "#99F6E4",
+    marginTop: 4
   },
   coachTitle: {
     color: colors.accent,
     fontSize: 13,
     fontWeight: "700",
     textTransform: "uppercase",
-    marginBottom: 8
+    marginBottom: 10,
+    letterSpacing: 0.4
   },
   coachText: {
     color: colors.text,
-    fontSize: 14,
-    lineHeight: 20
+    fontSize: 15,
+    lineHeight: 22
   }
 });

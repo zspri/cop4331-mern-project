@@ -1,25 +1,32 @@
 import React from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { workouts } from "../data/seed";
 import { colors } from "../theme/colors";
 
 export function WorkoutsScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Workouts</Text>
-      <FlatList
-        data={workouts}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <View style={styles.itemCard}>
-            <Text style={styles.itemTitle}>{item.title}</Text>
-            <Text style={styles.meta}>
-              {item.type.toUpperCase()} | {item.durationMin} min | Effort {item.perceivedEffort}/5
-            </Text>
-          </View>
-        )}
-      />
+      <View style={styles.content}>
+        <Text style={styles.title}>Workouts</Text>
+        <Text style={styles.subtitle}>Today’s training plan</Text>
+
+        <FlatList
+          data={workouts}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.itemCard}>
+              <Text style={styles.itemTitle}>{item.title}</Text>
+              <Text style={styles.meta}>
+                {item.type.toUpperCase()} • {item.durationMin} min
+              </Text>
+              <Text style={styles.metaSecondary}>
+                Effort {item.perceivedEffort}/5
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
     </View>
   );
 }
@@ -28,32 +35,53 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
-    padding: 16
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 24
+  },
+  content: {
+    width: "100%",
+    maxWidth: 760,
+    alignSelf: "center"
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "800",
-    color: colors.text,
-    marginBottom: 10
+    color: colors.text
+  },
+  subtitle: {
+    marginTop: 4,
+    marginBottom: 16,
+    fontSize: 15,
+    color: colors.mutetext
   },
   list: {
-    gap: 10
+    gap: 14
   },
   itemCard: {
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
-    padding: 12
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.accent,
   },
   itemTitle: {
-    fontSize: 16,
+    fontSize: 18,
     color: colors.text,
-    fontWeight: "700"
+    fontWeight: "800"
   },
   meta: {
-    fontSize: 12,
+    fontSize: 13,
     color: colors.mutetext,
-    marginTop: 4
+    marginTop: 8,
+    lineHeight: 18
+  },
+  metaSecondary: {
+  fontSize: 12,
+  color: colors.mutetext,
+  marginTop: 2
   }
 });
