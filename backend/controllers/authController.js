@@ -124,37 +124,32 @@ const forgotPassword = async (req, res) => {
 
         const user = await User.findOne({ email: normalizedEmail });
 
-        // Don't reveal whether user exists (security best practice)
         if (!user) {
             return res.status(200).json({
                 message: 'If that email exists, a reset link has been sent',
             });
         }
 
-        // Create 6-digit PIN
         const resetPin = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Hash PIN before saving
         const hashedToken = crypto
             .createHash('sha256')
             .update(resetPin)
             .digest('hex');
 
-        // Save to DB 
         user.resetPasswordToken = hashedToken;
         user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
 
         await user.save();
         
-        // Ethereal Email Sending
         let testAccount = await nodemailer.createTestAccount();
         let transporter = nodemailer.createTransport({
             host: "smtp.ethereal.email",
             port: 587,
-            secure: false, // true for 465, false for other ports
+            secure: false,
             auth: {
-                user: testAccount.user, // generated ethereal user
-                pass: testAccount.pass, // generated ethereal password
+                user: testAccount.user,
+                pass: testAccount.pass,
             },
         });
 
@@ -188,13 +183,11 @@ const resetPassword = async (req, res) => {
             return res.status(400).json({ error: 'PIN and New Password are required' });
         }
 
-        // Hash the PIN received
         const hashedToken = crypto
             .createHash('sha256')
             .update(pin)
             .digest('hex');
 
-        // Find user with valid token and check expiration
         const user = await User.findOne({
             resetPasswordToken: hashedToken,
             resetPasswordExpire: { $gt: Date.now() },
@@ -206,11 +199,9 @@ const resetPassword = async (req, res) => {
             });
         }
 
-        // Hash new password
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
 
-        // Clear fields
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
 
