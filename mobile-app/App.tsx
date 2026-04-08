@@ -16,19 +16,31 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("dashboard");
   const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [token, setToken] = useState<string | null>(null);
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    setToken(null);
+  };
 
   const screen = useMemo(() => {
-    if (tab === "workouts") return <WorkoutsScreen />;
-    if (tab === "nutrition") return <NutritionScreen />;
-    return <DashboardScreen />;
-  }, [tab]);
+    if (tab === "workouts") return <WorkoutsScreen token={token} currentUser={currentUser} />;
+    if (tab === "nutrition") return <NutritionScreen token={token} currentUser={currentUser} />;
+    return <DashboardScreen currentUser={currentUser} token={token} />;
+  }, [tab, currentUser, token]);
 
   if (!isAuthenticated) {
     if (authScreen === "login") {
       return (
         <LoginScreen
           onNavigate={setAuthScreen}
-          onLoginSuccess={() => setIsAuthenticated(true)}
+          onLoginSuccess={(user, tok) => {
+            setCurrentUser(user);
+            setToken(tok);
+            setIsAuthenticated(true);
+          }}
         />
       );
     }
@@ -49,8 +61,18 @@ export default function App() {
       <View style={styles.appShell}>
         <View style={styles.header}>
           <View style={styles.headerContent}>
-            <Text style={styles.brand}>MuscleMeter+</Text>
-            <Text style={styles.tagline}>Train smarter. Recover better.</Text>
+            <View>
+              <Text style={styles.brand}>MuscleMeter+</Text>
+              <Text style={styles.tagline}>Train smarter. Recover better.</Text>
+            </View>
+            
+            {currentUser && (
+              <View style={styles.profileBox}>
+                 <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+                   <Text style={styles.logoutText}>Logout</Text>
+                 </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
 
@@ -99,8 +121,32 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 760,
     alignSelf: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 0
+    paddingHorizontal: 16
+  },
+  profileBox: {
+    alignItems: "flex-end",
+  },
+  profileName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.text,
+  },
+  logoutButton: {
+    marginTop: 4,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  logoutText: {
+    fontSize: 12,
+    color: colors.accent,
+    fontWeight: "600"
   },
   brand: {
     color: colors.accent,

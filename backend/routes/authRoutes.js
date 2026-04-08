@@ -16,7 +16,7 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.get('/verify-email/:token', verifyEmail);
 router.post('/forgot-password', forgotPassword);
-router.post('/reset-password/:token', resetPassword);
+router.post('/reset-password', resetPassword);
 router.get('/me', authMiddleware, getMe);
 
 module.exports = router;

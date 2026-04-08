@@ -1,12 +1,54 @@
-import React from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Platform, ActivityIndicator } from "react-native";
 import { colors } from "../theme/colors";
 
 type Props = {
     onNavigate: (screen: "login" | "register" | "forgot" | "reset") => void;
 };
 
+const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5001/api/auth' : 'http://localhost:5001/api/auth';
+
 export function ResetPasswordScreen({onNavigate}: Props) {
+  const [pin, setPin] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleReset = async () => {
+    if (!pin || !password || !confirmPassword) {
+      Alert.alert("Error", "Please fill out all fields.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to reset password");
+      }
+
+      Alert.alert("Success", "Password reset successfully! You can now login.", [
+        { text: "OK", onPress: () => onNavigate("login") }
+      ]);
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Invalid or expired PIN.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -16,14 +58,26 @@ export function ResetPasswordScreen({onNavigate}: Props) {
         <View style={styles.card}>
           <Text style={styles.title}>Reset password</Text>
           <Text style={styles.description}>
-            Enter your new password below.
+            Enter your 6-digit PIN and your new password below.
           </Text>
+
+          <TextInput
+            placeholder="6-Digit PIN"
+            placeholderTextColor={colors.mutetext}
+            style={styles.input}
+            value={pin}
+            onChangeText={setPin}
+            keyboardType="number-pad"
+            maxLength={6}
+          />
 
           <TextInput
             placeholder="New password"
             placeholderTextColor={colors.mutetext}
             secureTextEntry
             style={styles.input}
+            value={password}
+            onChangeText={setPassword}
           />
 
           <TextInput
@@ -31,10 +85,21 @@ export function ResetPasswordScreen({onNavigate}: Props) {
             placeholderTextColor={colors.mutetext}
             secureTextEntry
             style={styles.input}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
           />
 
-          <TouchableOpacity style={styles.button} activeOpacity={0.8}>
-            <Text style={styles.buttonText}>Reset Password</Text>
+          <TouchableOpacity 
+            style={styles.button} 
+            activeOpacity={0.8}
+            onPress={handleReset}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Reset Password</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity

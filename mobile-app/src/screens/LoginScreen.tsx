@@ -1,13 +1,53 @@
-import React from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Platform, ActivityIndicator } from "react-native";
 import { colors } from "../theme/colors";
 
 type Props = {
     onNavigate: (screen: "login" | "register" | "forgot" | "reset") => void;
-    onLoginSuccess: () => void;
+    onLoginSuccess: (user: any, token: string) => void;
 }
 
+// Ensure the connection works seamlessly for any team member locally 
+const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5001/api/auth' : 'http://localhost:5001/api/auth';
+
 export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Email and password are required.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      // Successful login from database
+      Alert.alert("Success", "Logged in successfully!");
+      onLoginSuccess(data.user, data.token);
+      
+    } catch (error: any) {
+      Alert.alert("Authentication Failed", error.message || "Invalid credentials.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -21,6 +61,10 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
             placeholder="Email"
             placeholderTextColor={colors.mutetext}
             style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
 
           <TextInput
@@ -28,10 +72,21 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
             placeholderTextColor={colors.mutetext}
             secureTextEntry
             style={styles.input}
+            value={password}
+            onChangeText={setPassword}
           />
 
-          <TouchableOpacity style={styles.button} onPress={onLoginSuccess} activeOpacity={0.8}>
-            <Text style={styles.buttonText}>Login</Text>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={handleLogin} 
+            activeOpacity={0.8}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Login</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity

@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const workoutRoutes = require('./routes/workoutRoutes');
 
 dotenv.config();
 
@@ -24,6 +25,8 @@ app.get('/api/ping', (req, res) => {
 });
 
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/workouts', require('./routes/workoutRoutes'));
+app.use('/api/meals', require('./routes/mealRoutes'));
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

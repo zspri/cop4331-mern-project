@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 
 const registerUser = async (req, res) => {
@@ -130,13 +131,13 @@ const forgotPassword = async (req, res) => {
             });
         }
 
-        // Create reset token
-        const resetToken = crypto.randomBytes(32).toString('hex');
+        // Create 6-digit PIN
+        const resetPin = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Hash token before saving
+        // Hash PIN before saving
         const hashedToken = crypto
             .createHash('sha256')
-            .update(resetToken)
+            .update(resetPin)
             .digest('hex');
 
         // Save to DB 
@@ -145,14 +146,32 @@ const forgotPassword = async (req, res) => {
 
         await user.save();
         
-        // Create reset URL
-        const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+        // Ethereal Email Sending
+        let testAccount = await nodemailer.createTestAccount();
+        let transporter = nodemailer.createTransport({
+            host: "smtp.ethereal.email",
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+                user: testAccount.user, // generated ethereal user
+                pass: testAccount.pass, // generated ethereal password
+            },
+        });
 
-        // send email (nodemailer)
-        console.log('RESET URL:', resetUrl);
+        let info = await transporter.sendMail({
+            from: '"MuscleMeter AI" <noreply@musclemeter.com>',
+            to: user.email,
+            subject: "Your Password Reset PIN",
+            text: `Your password reset PIN is: ${resetPin}\nIt is valid for 15 minutes.`,
+            html: `<b>Your password reset PIN is: ${resetPin}</b><br>It is valid for 15 minutes.`,
+        });
+
+        console.log("-----------------------------------------");
+        console.log("Email Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        console.log("-----------------------------------------");
 
         return res.status(200).json({
-            message: 'Password reset link sent',
+            message: 'Password reset PIN sent',
         });
 
     } catch (error) {
@@ -163,17 +182,16 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
     try {
-        const { token } = req.params;
-        const { password } = req.body;
+        const { pin, password } = req.body;
 
-        if (!password) {
-            return res.status(400).json({ error: 'Password is required' });
+        if (!pin || !password) {
+            return res.status(400).json({ error: 'PIN and New Password are required' });
         }
 
-        // Hash token
+        // Hash the PIN received
         const hashedToken = crypto
             .createHash('sha256')
-            .update(token)
+            .update(pin)
             .digest('hex');
 
         // Find user with valid token and check expiration

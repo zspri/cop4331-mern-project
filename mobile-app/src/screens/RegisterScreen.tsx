@@ -1,12 +1,59 @@
-import React from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Platform, ActivityIndicator } from "react-native";
 import { colors } from "../theme/colors";
 
 type Props = {
     onNavigate: (screen: "login" | "register" | "forgot" | "reset") => void;
 };
 
+// Use 10.0.2.2 for Android emulator localhost, otherwise localhost
+const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5001/api/auth' : 'http://localhost:5001/api/auth';
+
 export function RegisterScreen({onNavigate}: Props) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (!firstName || !lastName || !email || !password) {
+      Alert.alert("Error", "All fields are required.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to register");
+      }
+
+      Alert.alert("Success", "Account created successfully! You can now login.", [
+        { text: "OK", onPress: () => onNavigate("login") }
+      ]);
+      
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -20,18 +67,26 @@ export function RegisterScreen({onNavigate}: Props) {
             placeholder="First name"
             placeholderTextColor={colors.mutetext}
             style={styles.input}
+            value={firstName}
+            onChangeText={setFirstName}
           />
 
           <TextInput
             placeholder="Last name"
             placeholderTextColor={colors.mutetext}
             style={styles.input}
+            value={lastName}
+            onChangeText={setLastName}
           />
 
           <TextInput
             placeholder="Email"
             placeholderTextColor={colors.mutetext}
             style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
 
           <TextInput
@@ -39,10 +94,20 @@ export function RegisterScreen({onNavigate}: Props) {
             placeholderTextColor={colors.mutetext}
             secureTextEntry
             style={styles.input}
+            value={password}
+            onChangeText={setPassword}
           />
 
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Create Account</Text>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={handleRegister}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Create Account</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
