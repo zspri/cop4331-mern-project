@@ -9,7 +9,7 @@ const createWorkout = async (req, res) => {
         }
 
         const workout = await Workout.create({
-            user: req.user.userId,
+            user: req.user._id,
             name,
             category,
             notes,
@@ -25,7 +25,7 @@ const createWorkout = async (req, res) => {
 
 const getWorkouts = async (req, res) => {
     try {
-        const workouts = await Workout.find({ user: req.user.userId }).sort({
+        const workouts = await Workout.find({ user: req.user._id }).sort({
             createdAt: -1,
         });
 
@@ -40,7 +40,7 @@ const getWorkoutById = async (req, res) => {
     try {
         const workout = await Workout.findOne({
             _id: req.params.id,
-            user: req.user.userId,
+            user: req.user._id,
         });
 
         if (!workout) {
@@ -58,7 +58,7 @@ const updateWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({
             _id: req.params.id,
-            user: req.user.userId,
+            user: req.user._id,
         });
 
         if (!workout) {
@@ -85,7 +85,7 @@ const deleteWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({
             _id: req.params.id,
-            user: req.user.userId,
+            user: req.user._id,
         });
 
         if (!workout) {
@@ -113,7 +113,7 @@ const addExerciseToWorkout = async (req, res) => {
 
         const workout = await Workout.findOne({
             _id: req.params.id,
-            user: req.user.userId,
+            user: req.user._id,
         });
 
         if (!workout) {
@@ -145,7 +145,7 @@ const updateExerciseInWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({
             _id: req.params.id,
-            user: req.user.userId,
+            user: req.user._id,
         });
 
         if (!workout) {
@@ -182,7 +182,7 @@ const deleteExerciseFromWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({
             _id: req.params.id,
-            user: req.user.userId,
+            user: req.user._id,
         });
 
         if (!workout) {

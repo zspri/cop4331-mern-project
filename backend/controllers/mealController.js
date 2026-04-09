@@ -5,7 +5,7 @@ const createMeal = async (req, res) => {
         const { name, calories, proteinG, carbsG, fatsG, date } = req.body;
         if (!name) return res.status(400).json({ error: 'Meal name is required' });
         const meal = await Meal.create({
-            user: req.user.userId,
+            user: req.user._id,
             name,
             calories: calories || 0,
             proteinG: proteinG || 0,
@@ -22,7 +22,7 @@ const createMeal = async (req, res) => {
 
 const getMeals = async (req, res) => {
     try {
-        const meals = await Meal.find({ user: req.user.userId }).sort({ createdAt: -1 });
+        const meals = await Meal.find({ user: req.user._id }).sort({ createdAt: -1 });
         return res.status(200).json(meals);
     } catch (error) {
         console.error('getMeals error:', error);
@@ -32,7 +32,7 @@ const getMeals = async (req, res) => {
 
 const getMealById = async (req, res) => {
     try {
-        const meal = await Meal.findOne({ _id: req.params.id, user: req.user.userId });
+        const meal = await Meal.findOne({ _id: req.params.id, user: req.user._id });
         if (!meal) return res.status(404).json({ error: 'Meal not found' });
         return res.status(200).json(meal);
     } catch (error) {
@@ -43,7 +43,7 @@ const getMealById = async (req, res) => {
 
 const updateMeal = async (req, res) => {
     try {
-        const meal = await Meal.findOne({ _id: req.params.id, user: req.user.userId });
+        const meal = await Meal.findOne({ _id: req.params.id, user: req.user._id });
         if (!meal) return res.status(404).json({ error: 'Meal not found' });
         const { name, calories, proteinG, carbsG, fatsG, date } = req.body;
         if (name !== undefined) meal.name = name;
@@ -62,7 +62,7 @@ const updateMeal = async (req, res) => {
 
 const deleteMeal = async (req, res) => {
     try {
-        const meal = await Meal.findOne({ _id: req.params.id, user: req.user.userId });
+        const meal = await Meal.findOne({ _id: req.params.id, user: req.user._id });
         if (!meal) return res.status(404).json({ error: 'Meal not found' });
         await meal.deleteOne();
         return res.status(200).json({ message: 'Meal deleted successfully' });
