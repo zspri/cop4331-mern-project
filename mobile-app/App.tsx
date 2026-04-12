@@ -25,9 +25,9 @@ export default function App() {
 function AppContent() {
   const { colors, mode, toggleTheme } = useTheme();
   const { width, height } = useWindowDimensions();
-  const isWebLandscape = Platform.OS === "web" && width > height;
-  const sideGutter = isWebLandscape ? 96 : 16;
-  const contentMaxWidth = isWebLandscape ? Math.max(1200, width - sideGutter * 2) : 900;
+  const isLandscape = width > height;
+  const sideGutter = isLandscape ? 96 : 16;
+  const contentMaxWidth = isLandscape ? Math.max(1200, width - sideGutter * 2) : 900;
   const styles = useMemo(() => createStyles(colors, sideGutter, contentMaxWidth), [colors, sideGutter, contentMaxWidth]);
 
   useEffect(() => {

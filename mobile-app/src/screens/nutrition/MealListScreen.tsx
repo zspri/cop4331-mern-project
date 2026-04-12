@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  Platform,
   useWindowDimensions,
 } from "react-native";
 import { useTheme } from "../../theme/ThemeContext";
@@ -33,9 +32,9 @@ function MacroPill({ label, value, unit, styles }: { label: string; value: strin
 
 export function MealListScreen({ meals, loading, onAdd, onView, onEdit, onProgress }: Props) {
   const { width, height } = useWindowDimensions();
-  const isWebLandscape = Platform.OS === "web" && width > height;
-  const sideGutter = isWebLandscape ? 96 : 16;
-  const contentMaxWidth = isWebLandscape ? Math.max(1200, width - sideGutter * 2) : 900;
+  const isLandscape = width > height;
+  const sideGutter = isLandscape ? 96 : 16;
+  const contentMaxWidth = isLandscape ? Math.max(1200, width - sideGutter * 2) : 900;
 
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors, sideGutter, contentMaxWidth), [colors, sideGutter, contentMaxWidth]);
