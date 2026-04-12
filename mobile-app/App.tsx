@@ -138,19 +138,6 @@ function AppContent() {
                 {currentUser && (
                   <View style={styles.profileBox}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 }}>
-                      <Pressable
-                        onPress={toggleTheme}
-                        style={({ pressed }) => [
-                          styles.headerThemeToggle,
-                          pressed && styles.headerThemeTogglePressed
-                        ]}
-                      >
-                        <Ionicons
-                          name={toggleIconName}
-                          size={16}
-                          color={toggleIconColor}
-                        />
-                      </Pressable>
                       <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
                         <Text style={styles.logoutText}>Logout</Text>
                       </TouchableOpacity>
@@ -196,6 +183,24 @@ function AppContent() {
         ) : (
           authFlowScreen
         )}
+
+        <Pressable
+          style={({ hovered, pressed }: any) => [
+            styles.themeToggle,
+            isAuthenticated && styles.themeToggleAboveNav,
+            (hovered || pressed) && styles.themeToggleInteractive
+          ]}
+          onPress={toggleTheme}
+          accessibilityRole="button"
+          accessibilityLabel={mode === "light" ? "Switch to dark mode" : "Switch to light mode"}
+        >
+          <Ionicons
+            name={toggleIconName}
+            size={22}
+            color={toggleIconColor}
+            style={styles.themeToggleIcon}
+          />
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -296,18 +301,30 @@ function createStyles(colors: ThemeColors) {
       color: colors.accent,
       fontWeight: "700"
     },
-    headerThemeToggle: {
+    themeToggle: {
+      position: "absolute",
+      right: 16,
+      bottom: 22,
       backgroundColor: colors.toggleBg,
       borderWidth: 1,
       borderColor: colors.toggleBorder,
-      padding: 6,
-      borderRadius: 8,
+      width: 48,
+      height: 48,
+      borderRadius: 999,
       alignItems: "center",
       justifyContent: "center",
+      zIndex: 5,
+      elevation: 4
     },
-    headerThemeTogglePressed: {
+    themeToggleAboveNav: {
+      bottom: 92
+    },
+    themeToggleInteractive: {
       backgroundColor: colors.tileHover,
       borderColor: colors.accent
+    },
+    themeToggleIcon: {
+      lineHeight: 22
     }
   });
 }

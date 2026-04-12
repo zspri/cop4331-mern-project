@@ -12,14 +12,12 @@ import {
   useWindowDimensions
 } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
+import { AUTH_API_URL } from "../config/api";
 import type { ThemeColors } from "../theme/colors";
 
 type Props = {
   onNavigate: (screen: "login" | "register" | "forgot" | "reset") => void;
 };
-
-const API_URL =
-  Platform.OS === "android" ? "http://10.0.2.2:5001/api/auth" : "http://localhost:5001/api/auth";
 
 export function RegisterScreen({ onNavigate }: Props) {
   const { colors } = useTheme();
@@ -47,7 +45,7 @@ export function RegisterScreen({ onNavigate }: Props) {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/register`, {
+      const response = await fetch(`${AUTH_API_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
