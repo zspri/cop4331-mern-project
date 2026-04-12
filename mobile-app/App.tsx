@@ -114,7 +114,7 @@ function AppContent() {
         )}
 
         <TouchableOpacity
-          style={styles.themeToggle}
+          style={[styles.themeToggle, isAuthenticated && styles.themeToggleAboveNav]}
           onPress={toggleTheme}
           activeOpacity={0.85}
           accessibilityRole="button"
@@ -213,6 +213,9 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.toggleBorder,
       zIndex: 5,
       elevation: 4
+    },
+    themeToggleAboveNav: {
+      bottom: 92
     },
     themeToggleIcon: {
       color: colors.toggleText,
