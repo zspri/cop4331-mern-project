@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,8 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
-import { colors } from "../../theme/colors";
+import { useTheme } from "../../theme/ThemeContext";
+import type { ThemeColors } from "../../theme/colors";
 
 type Props = {
   isEdit: boolean;
@@ -35,6 +36,9 @@ export function MealFormScreen({
   onChangeName, onChangeCalories, onChangeProtein, onChangeCarbs, onChangeFats, onChangeDate,
   onSubmit, onBack,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.content}>
@@ -81,17 +85,19 @@ export function MealFormScreen({
   );
 }
 
-const styles = StyleSheet.create({
-  scrollContainer: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40 },
-  content: { width: "100%", maxWidth: 760, alignSelf: "center" },
-  backBtn: { marginBottom: 12 },
-  backBtnText: { color: colors.accent, fontSize: 15, fontWeight: "700" },
-  title: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 16 },
-  formCard: { backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, marginBottom: 16 },
-  fieldLabel: { fontSize: 13, fontWeight: "600", color: colors.mutetext, marginBottom: 4, marginTop: 8 },
-  input: { backgroundColor: colors.bg, borderRadius: 10, padding: 12, marginBottom: 4, borderWidth: 1, borderColor: colors.border, color: colors.text, fontSize: 15 },
-  macroInputRow: { flexDirection: "row", gap: 10 },
-  macroInputField: { flex: 1 },
-  submitBtn: { backgroundColor: colors.accent, paddingVertical: 16, borderRadius: 16, alignItems: "center", shadowColor: colors.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 5 },
-  submitBtnText: { color: "#fff", fontWeight: "800", fontSize: 16 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    scrollContainer: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, flexGrow: 1 },
+    content: { width: "100%", maxWidth: 900, alignSelf: "center", flex: 1 },
+    backBtn: { marginBottom: 12 },
+    backBtnText: { color: colors.accent, fontSize: 15, fontWeight: "700" },
+    title: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 16 },
+    formCard: { backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, marginBottom: 16 },
+    fieldLabel: { fontSize: 13, fontWeight: "600", color: colors.mutetext, marginBottom: 4, marginTop: 8 },
+    input: { backgroundColor: colors.bg, borderRadius: 10, padding: 12, marginBottom: 4, borderWidth: 1, borderColor: colors.border, color: colors.text, fontSize: 15 },
+    macroInputRow: { flexDirection: "row", gap: 10 },
+    macroInputField: { flex: 1 },
+    submitBtn: { backgroundColor: colors.accent, paddingVertical: 16, borderRadius: 16, alignItems: "center", shadowColor: colors.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 5 },
+    submitBtnText: { color: "#fff", fontWeight: "800", fontSize: 16 },
+  });
+}

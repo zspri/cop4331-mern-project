@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import { colors } from "../../theme/colors";
+import { useTheme } from "../../theme/ThemeContext";
+import type { ThemeColors } from "../../theme/colors";
 import { Meal, PROTEIN_GOAL, CALORIES_GOAL } from "./nutritionTypes";
 
 const BAR_MAX_HEIGHT = 120;
@@ -40,12 +41,16 @@ function BarChart({
   goal,
   max,
   title,
+  styles,
+  colors
 }: {
   weeks: WeekData[];
   valueKey: "cals" | "protein";
   goal: number;
   max: number;
   title: string;
+  styles: any;
+  colors: ThemeColors;
 }) {
   return (
     <View style={styles.graphCard}>
@@ -93,6 +98,9 @@ function BarChart({
 }
 
 export function NutritionProgressScreen({ meals, onBack }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const weeks = getWeeks(meals);
   const maxCals = Math.max(...weeks.map((w) => w.cals), CALORIES_GOAL, 1);
   const maxProtein = Math.max(...weeks.map((w) => w.protein), PROTEIN_GOAL, 1);
@@ -109,8 +117,8 @@ export function NutritionProgressScreen({ meals, onBack }: Props) {
         <Text style={styles.title}>Nutrition Progress</Text>
         <Text style={styles.subtitle}>Daily averages per week</Text>
 
-        <BarChart weeks={weeks} valueKey="cals" goal={CALORIES_GOAL} max={maxCals} title="Avg. Daily Calories" />
-        <BarChart weeks={weeks} valueKey="protein" goal={PROTEIN_GOAL} max={maxProtein} title="Avg. Daily Protein (g)" />
+        <BarChart weeks={weeks} valueKey="cals" goal={CALORIES_GOAL} max={maxCals} title="Avg. Daily Calories" styles={styles} colors={colors} />
+        <BarChart weeks={weeks} valueKey="protein" goal={PROTEIN_GOAL} max={maxProtein} title="Avg. Daily Protein (g)" styles={styles} colors={colors} />
 
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
@@ -131,34 +139,36 @@ export function NutritionProgressScreen({ meals, onBack }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  scrollContainer: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40 },
-  content: { width: "100%", maxWidth: 760, alignSelf: "center" },
-  backBtn: { marginBottom: 12 },
-  backBtnText: { color: colors.accent, fontSize: 15, fontWeight: "700" },
-  title: { fontSize: 24, fontWeight: "800", color: colors.text },
-  subtitle: { marginTop: 4, fontSize: 15, color: colors.mutetext, marginBottom: 16 },
-  graphCard: { backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, marginBottom: 16 },
-  graphTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 8 },
-  goalLabelRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
-  goalDash: { width: 24, height: 2, backgroundColor: colors.warning },
-  goalLabelText: { fontSize: 13, color: colors.mutetext, fontWeight: "600" },
-  chartArea: { flexDirection: "row", height: 170, alignItems: "flex-end" },
-  yAxis: { width: 36, height: 150, justifyContent: "space-between", alignItems: "flex-end", paddingRight: 4 },
-  yLabel: { fontSize: 10, color: colors.mutetext },
-  barsArea: { flex: 1, position: "relative", height: 150, justifyContent: "flex-end" },
-  goalLine: { position: "absolute", left: 0, right: 0, height: 2, backgroundColor: colors.warning, opacity: 0.6, zIndex: 1 },
-  barsRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-around", height: 150, zIndex: 2 },
-  barWrapper: { alignItems: "center", flex: 1, gap: 4, justifyContent: "flex-end", paddingBottom: 24 },
-  barCount: { fontSize: 10, fontWeight: "700", color: colors.text, marginBottom: 2 },
-  bar: { width: 26, borderRadius: 6 },
-  barLabel: { fontSize: 9, color: colors.mutetext, position: "absolute", bottom: 4 },
-  legend: { flexDirection: "row", gap: 16, marginTop: 12 },
-  legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
-  legendDot: { width: 10, height: 10, borderRadius: 5 },
-  legendText: { fontSize: 12, color: colors.mutetext },
-  statsRow: { flexDirection: "row", gap: 12, marginBottom: 24 },
-  statBox: { flex: 1, backgroundColor: colors.card, borderRadius: 14, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border },
-  statValue: { fontSize: 24, fontWeight: "800", color: colors.accent },
-  statLabel: { fontSize: 11, color: colors.mutetext, marginTop: 4, textAlign: "center", fontWeight: "600" },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    scrollContainer: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, flexGrow: 1 },
+    content: { width: "100%", maxWidth: 900, alignSelf: "center", flex: 1 },
+    backBtn: { marginBottom: 12 },
+    backBtnText: { color: colors.accent, fontSize: 15, fontWeight: "700" },
+    title: { fontSize: 24, fontWeight: "800", color: colors.text },
+    subtitle: { marginTop: 4, fontSize: 15, color: colors.mutetext, marginBottom: 16 },
+    graphCard: { backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, marginBottom: 16 },
+    graphTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 8 },
+    goalLabelRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
+    goalDash: { width: 24, height: 2, backgroundColor: colors.warning },
+    goalLabelText: { fontSize: 13, color: colors.mutetext, fontWeight: "600" },
+    chartArea: { flexDirection: "row", height: 170, alignItems: "flex-end" },
+    yAxis: { width: 36, height: 150, justifyContent: "space-between", alignItems: "flex-end", paddingRight: 4 },
+    yLabel: { fontSize: 10, color: colors.mutetext },
+    barsArea: { flex: 1, position: "relative", height: 150, justifyContent: "flex-end" },
+    goalLine: { position: "absolute", left: 0, right: 0, height: 2, backgroundColor: colors.warning, opacity: 0.6, zIndex: 1 },
+    barsRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-around", height: 150, zIndex: 2 },
+    barWrapper: { alignItems: "center", flex: 1, gap: 4, justifyContent: "flex-end", paddingBottom: 24 },
+    barCount: { fontSize: 10, fontWeight: "700", color: colors.text, marginBottom: 2 },
+    bar: { width: 26, borderRadius: 6 },
+    barLabel: { fontSize: 9, color: colors.mutetext, position: "absolute", bottom: 4 },
+    legend: { flexDirection: "row", gap: 16, marginTop: 12 },
+    legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+    legendDot: { width: 10, height: 10, borderRadius: 5 },
+    legendText: { fontSize: 12, color: colors.mutetext },
+    statsRow: { flexDirection: "row", gap: 12, marginBottom: 24 },
+    statBox: { flex: 1, backgroundColor: colors.card, borderRadius: 14, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border },
+    statValue: { fontSize: 24, fontWeight: "800", color: colors.accent },
+    statLabel: { fontSize: 11, color: colors.mutetext, marginTop: 4, textAlign: "center", fontWeight: "600" },
+  });
+}

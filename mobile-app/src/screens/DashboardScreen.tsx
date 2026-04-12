@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -7,7 +7,8 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { colors } from "../theme/colors";
+import { useTheme } from "../theme/ThemeContext";
+import type { ThemeColors } from "../theme/colors";
 
 const BASE =
   Platform.OS === "android" ? "http://10.0.2.2:5001/api" : "http://localhost:5001/api";
@@ -26,35 +27,24 @@ function authHeader(token: string | null | undefined) {
   return { Authorization: `Bearer ${token ?? ""}` };
 }
 
-function ProgressBar({ value, max, color }: { value: number; max: number; color: string }) {
+function ProgressBar({ value, max, color, themeColors }: { value: number; max: number; color: string; themeColors: ThemeColors }) {
   const pct = Math.min((value / Math.max(max, 1)) * 100, 100);
   return (
-    <View style={pbStyles.track}>
+    <View style={[pbStyles.track, { backgroundColor: themeColors.border }]}>
       <View style={[pbStyles.fill, { width: `${pct}%` as any, backgroundColor: color }]} />
     </View>
   );
 }
 
 const pbStyles = StyleSheet.create({
-  track: { height: 8, borderRadius: 6, backgroundColor: "#E4E7EB", overflow: "hidden", marginTop: 6 },
+  track: { height: 8, borderRadius: 6, overflow: "hidden", marginTop: 6 },
   fill: { height: "100%", borderRadius: 6 },
 });
 
-function StatBox({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <View style={styles.statBox}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-      {sub ? <Text style={styles.statSub}>{sub}</Text> : null}
-    </View>
-  );
-}
-
-function SectionHeader({ title }: { title: string }) {
-  return <Text style={styles.sectionLabel}>{title}</Text>;
-}
-
 export function DashboardScreen({ currentUser, token }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const [workouts, setWorkouts] = useState<any[]>([]);
   const [meals, setMeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,6 +107,20 @@ export function DashboardScreen({ currentUser, token }: Props) {
     return `${workoutsThisWeek} of ${WORKOUT_GOAL} workouts done this week. Log your meals in the Nutrition tab to get more personalised advice.`;
   };
 
+  function StatBox({ label, value, sub }: { label: string; value: string; sub?: string }) {
+    return (
+      <View style={styles.statBox}>
+        <Text style={styles.statValue}>{value}</Text>
+        <Text style={styles.statLabel}>{label}</Text>
+        {sub ? <Text style={styles.statSub}>{sub}</Text> : null}
+      </View>
+    );
+  }
+
+  function SectionHeader({ title }: { title: string }) {
+    return <Text style={styles.sectionLabel}>{title}</Text>;
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.content}>
@@ -134,7 +138,7 @@ export function DashboardScreen({ currentUser, token }: Props) {
                   <Text style={styles.weekMetric}>
                     {workoutsThisWeek} <Text style={styles.weekGoal}>/ {WORKOUT_GOAL} workouts</Text>
                   </Text>
-                  <ProgressBar value={workoutsThisWeek} max={WORKOUT_GOAL} color={colors.accent} />
+                  <ProgressBar value={workoutsThisWeek} max={WORKOUT_GOAL} color={colors.accent} themeColors={colors} />
                 </View>
                 <View style={styles.weekBadge}>
                   <Text style={styles.weekPct}>{weekWorkoutPct}%</Text>
@@ -145,7 +149,7 @@ export function DashboardScreen({ currentUser, token }: Props) {
                   <Text style={styles.weekMetric}>
                     {exercisesThisWeek} <Text style={styles.weekGoal}>/ {EXERCISE_GOAL} exercises</Text>
                   </Text>
-                  <ProgressBar value={exercisesThisWeek} max={EXERCISE_GOAL} color={colors.warning} />
+                  <ProgressBar value={exercisesThisWeek} max={EXERCISE_GOAL} color={colors.warning} themeColors={colors} />
                 </View>
               </View>
             </View>
@@ -164,13 +168,13 @@ export function DashboardScreen({ currentUser, token }: Props) {
                     <Text style={styles.macroLabel}>Calories</Text>
                     <Text style={styles.macroBigVal}>{calsToday}</Text>
                     <Text style={styles.macroUnit}>/ {CALORIE_GOAL} kcal</Text>
-                    <ProgressBar value={calsToday} max={CALORIE_GOAL} color={colors.accent} />
+                    <ProgressBar value={calsToday} max={CALORIE_GOAL} color={colors.accent} themeColors={colors} />
                   </View>
                   <View style={{ flex: 1, gap: 8 }}>
                     <View style={styles.macroSmall}>
                       <Text style={styles.macroLabel}>Protein</Text>
                       <Text style={styles.macroSmallVal}>{proteinToday}g</Text>
-                      <ProgressBar value={proteinToday} max={PROTEIN_GOAL} color="#8B5CF6" />
+                      <ProgressBar value={proteinToday} max={PROTEIN_GOAL} color="#8B5CF6" themeColors={colors} />
                     </View>
                     <View style={styles.macroSmall}>
                       <Text style={styles.macroLabel}>Carbs</Text>
@@ -237,42 +241,44 @@ export function DashboardScreen({ currentUser, token }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, backgroundColor: colors.bg },
-  content: { width: "100%", maxWidth: 760, alignSelf: "center", gap: 12 },
-  header: { marginTop: 8, fontSize: 24, fontWeight: "800", color: colors.text },
-  subheader: { marginTop: -4, fontSize: 15, color: colors.mutetext },
-  sectionLabel: { fontSize: 12, fontWeight: "700", color: colors.mutetext, textTransform: "uppercase", letterSpacing: 0.8, marginTop: 8 },
-  weekCard: { backgroundColor: colors.card, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: colors.border },
-  weekCardTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 14 },
-  weekRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  weekMetric: { fontSize: 18, fontWeight: "800", color: colors.text },
-  weekGoal: { fontSize: 13, fontWeight: "500", color: colors.mutetext },
-  weekBadge: { backgroundColor: colors.accentSoft, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, alignItems: "center" },
-  weekPct: { fontSize: 15, fontWeight: "800", color: colors.accent },
-  emptyCard: { backgroundColor: colors.card, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: colors.border, alignItems: "center" },
-  emptyText: { fontSize: 15, fontWeight: "700", color: colors.text },
-  emptySub: { fontSize: 13, color: colors.mutetext, marginTop: 4, textAlign: "center" },
-  macroRow: { flexDirection: "row", gap: 10 },
-  macroBig: { backgroundColor: colors.card, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: colors.border },
-  macroSmall: { backgroundColor: colors.card, borderRadius: 12, padding: 10, borderWidth: 1, borderColor: colors.border },
-  macroLabel: { fontSize: 11, fontWeight: "700", color: colors.mutetext, textTransform: "uppercase", letterSpacing: 0.3 },
-  macroBigVal: { fontSize: 28, fontWeight: "800", color: colors.accent, marginTop: 2 },
-  macroSmallVal: { fontSize: 16, fontWeight: "800", color: colors.text, marginTop: 2 },
-  macroUnit: { fontSize: 12, color: colors.mutetext, marginTop: 2 },
-  mealCount: { fontSize: 12, color: colors.mutetext, marginTop: -4 },
-  statsRow: { flexDirection: "row", gap: 10 },
-  statBox: { flex: 1, backgroundColor: colors.card, borderRadius: 14, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border },
-  statValue: { fontSize: 26, fontWeight: "800", color: colors.accent },
-  statLabel: { fontSize: 12, color: colors.text, fontWeight: "600", marginTop: 2, textAlign: "center" },
-  statSub: { fontSize: 11, color: colors.mutetext, marginTop: 1 },
-  lastCard: { backgroundColor: colors.card, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: colors.border, borderLeftWidth: 4, borderLeftColor: colors.accent },
-  lastName: { fontSize: 17, fontWeight: "800", color: colors.text },
-  lastMeta: { fontSize: 13, color: colors.mutetext, marginTop: 4 },
-  exerciseTags: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
-  exerciseTag: { backgroundColor: colors.accentSoft, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
-  exerciseTagText: { fontSize: 12, color: colors.accent, fontWeight: "600" },
-  coachCard: { backgroundColor: colors.accentSoft, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: "#99F6E4" },
-  coachTitle: { color: colors.accent, fontSize: 12, fontWeight: "700", textTransform: "uppercase", marginBottom: 8, letterSpacing: 0.4 },
-  coachText: { color: colors.text, fontSize: 15, lineHeight: 23 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, backgroundColor: colors.bg },
+    content: { width: "100%", maxWidth: 900, alignSelf: "center", gap: 12 },
+    header: { marginTop: 8, fontSize: 24, fontWeight: "800", color: colors.text },
+    subheader: { marginTop: -4, fontSize: 15, color: colors.mutetext },
+    sectionLabel: { fontSize: 12, fontWeight: "700", color: colors.mutetext, textTransform: "uppercase", letterSpacing: 0.8, marginTop: 8 },
+    weekCard: { backgroundColor: colors.card, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: colors.border },
+    weekCardTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 14 },
+    weekRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+    weekMetric: { fontSize: 18, fontWeight: "800", color: colors.text },
+    weekGoal: { fontSize: 13, fontWeight: "500", color: colors.mutetext },
+    weekBadge: { backgroundColor: colors.accentSoft, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, alignItems: "center" },
+    weekPct: { fontSize: 15, fontWeight: "800", color: colors.accent },
+    emptyCard: { backgroundColor: colors.card, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: colors.border, alignItems: "center" },
+    emptyText: { fontSize: 15, fontWeight: "700", color: colors.text },
+    emptySub: { fontSize: 13, color: colors.mutetext, marginTop: 4, textAlign: "center" },
+    macroRow: { flexDirection: "row", gap: 10 },
+    macroBig: { backgroundColor: colors.card, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: colors.border },
+    macroSmall: { backgroundColor: colors.card, borderRadius: 12, padding: 10, borderWidth: 1, borderColor: colors.border },
+    macroLabel: { fontSize: 11, fontWeight: "700", color: colors.mutetext, textTransform: "uppercase", letterSpacing: 0.3 },
+    macroBigVal: { fontSize: 28, fontWeight: "800", color: colors.accent, marginTop: 2 },
+    macroSmallVal: { fontSize: 16, fontWeight: "800", color: colors.text, marginTop: 2 },
+    macroUnit: { fontSize: 12, color: colors.mutetext, marginTop: 2 },
+    mealCount: { fontSize: 12, color: colors.mutetext, marginTop: -4 },
+    statsRow: { flexDirection: "row", gap: 10 },
+    statBox: { flex: 1, backgroundColor: colors.card, borderRadius: 14, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border },
+    statValue: { fontSize: 26, fontWeight: "800", color: colors.accent },
+    statLabel: { fontSize: 12, color: colors.text, fontWeight: "600", marginTop: 2, textAlign: "center" },
+    statSub: { fontSize: 11, color: colors.mutetext, marginTop: 1 },
+    lastCard: { backgroundColor: colors.card, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: colors.border, borderLeftWidth: 4, borderLeftColor: colors.accent },
+    lastName: { fontSize: 17, fontWeight: "800", color: colors.text },
+    lastMeta: { fontSize: 13, color: colors.mutetext, marginTop: 4 },
+    exerciseTags: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
+    exerciseTag: { backgroundColor: colors.accentSoft, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
+    exerciseTagText: { fontSize: 12, color: colors.accent, fontWeight: "600" },
+    coachCard: { backgroundColor: colors.accentSoft, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: colors.coachBorder || "#99F6E4" },
+    coachTitle: { color: colors.accent, fontSize: 12, fontWeight: "700", textTransform: "uppercase", marginBottom: 8, letterSpacing: 0.4 },
+    coachText: { color: colors.text, fontSize: 15, lineHeight: 23 },
+  });
+}

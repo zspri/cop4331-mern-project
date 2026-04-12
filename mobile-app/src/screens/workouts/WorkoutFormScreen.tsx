@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,8 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
-import { colors } from "../../theme/colors";
+import { useTheme } from "../../theme/ThemeContext";
+import type { ThemeColors } from "../../theme/colors";
 import { Exercise } from "./workoutTypes";
 
 type Props = {
@@ -33,6 +34,9 @@ export function WorkoutFormScreen({
   onChangeName, onChangeCategory, onChangeNotes,
   onUpdateExercise, onAddExercise, onRemoveExercise, onSubmit, onBack,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.content}>
@@ -97,6 +101,7 @@ export function WorkoutFormScreen({
                   <TextInput
                     style={styles.input}
                     keyboardType="numeric"
+                    placeholderTextColor={colors.mutetext}
                     value={String(ex[field])}
                     onChangeText={(v) => onUpdateExercise(idx, field, v)}
                   />
@@ -122,25 +127,27 @@ export function WorkoutFormScreen({
   );
 }
 
-const styles = StyleSheet.create({
-  scrollContainer: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40 },
-  content: { width: "100%", maxWidth: 760, alignSelf: "center" },
-  backBtn: { marginBottom: 12 },
-  backBtnText: { color: colors.accent, fontSize: 15, fontWeight: "700" },
-  title: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: "700", color: colors.text, marginTop: 20, marginBottom: 10 },
-  formCard: { backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, marginBottom: 8 },
-  fieldLabel: { fontSize: 13, fontWeight: "600", color: colors.mutetext, marginBottom: 4, marginTop: 8 },
-  input: { backgroundColor: colors.bg, borderRadius: 10, padding: 12, marginBottom: 4, borderWidth: 1, borderColor: colors.border, color: colors.text, fontSize: 15 },
-  textArea: { minHeight: 72, textAlignVertical: "top" },
-  exerciseFormCard: { backgroundColor: colors.card, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: colors.border, marginBottom: 12 },
-  exerciseFormHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
-  exerciseFormTitle: { fontWeight: "700", color: colors.text, fontSize: 15 },
-  removeText: { color: "#E11D48", fontWeight: "600", fontSize: 13 },
-  exerciseFormRow: { flexDirection: "row", gap: 8 },
-  exerciseFormField: { flex: 1 },
-  addExerciseBtn: { backgroundColor: colors.accentSoft, paddingVertical: 14, borderRadius: 14, alignItems: "center", borderWidth: 1, borderColor: colors.accent + "40", marginTop: 4, marginBottom: 12 },
-  addExerciseBtnText: { color: colors.accent, fontWeight: "700", fontSize: 15 },
-  submitBtn: { backgroundColor: colors.accent, paddingVertical: 16, borderRadius: 16, alignItems: "center", shadowColor: colors.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 5 },
-  submitBtnText: { color: "#fff", fontWeight: "800", fontSize: 16 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    scrollContainer: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, flexGrow: 1 },
+    content: { width: "100%", maxWidth: 900, alignSelf: "center", flex: 1 },
+    backBtn: { marginBottom: 12 },
+    backBtnText: { color: colors.accent, fontSize: 15, fontWeight: "700" },
+    title: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 16 },
+    sectionTitle: { fontSize: 18, fontWeight: "700", color: colors.text, marginTop: 20, marginBottom: 10 },
+    formCard: { backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, marginBottom: 8 },
+    fieldLabel: { fontSize: 13, fontWeight: "600", color: colors.mutetext, marginBottom: 4, marginTop: 8 },
+    input: { backgroundColor: colors.bg, borderRadius: 10, padding: 12, marginBottom: 4, borderWidth: 1, borderColor: colors.border, color: colors.text, fontSize: 15 },
+    textArea: { minHeight: 72, textAlignVertical: "top" },
+    exerciseFormCard: { backgroundColor: colors.card, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: colors.border, marginBottom: 12 },
+    exerciseFormHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
+    exerciseFormTitle: { fontWeight: "700", color: colors.text, fontSize: 15 },
+    removeText: { color: "#E11D48", fontWeight: "600", fontSize: 13 },
+    exerciseFormRow: { flexDirection: "row", gap: 8 },
+    exerciseFormField: { flex: 1 },
+    addExerciseBtn: { backgroundColor: colors.accentSoft, paddingVertical: 14, borderRadius: 14, alignItems: "center", borderWidth: 1, borderColor: colors.accent + "40", marginTop: 4, marginBottom: 12 },
+    addExerciseBtnText: { color: colors.accent, fontWeight: "700", fontSize: 15 },
+    submitBtn: { backgroundColor: colors.accent, paddingVertical: 16, borderRadius: 16, alignItems: "center", shadowColor: colors.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 5 },
+    submitBtnText: { color: "#fff", fontWeight: "800", fontSize: 16 },
+  });
+}
