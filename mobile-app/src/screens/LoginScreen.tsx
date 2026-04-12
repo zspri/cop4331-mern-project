@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { Pressable, View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import type { ThemeColors } from "../theme/colors";
 
@@ -34,9 +34,19 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
             style={styles.input}
           />
 
-          <TouchableOpacity style={styles.button} onPress={onLoginSuccess} activeOpacity={0.8}>
-            <Text style={styles.buttonText}>Login</Text>
-          </TouchableOpacity>
+          <Pressable
+            style={({ hovered, pressed }) => [
+              styles.button,
+              (hovered || pressed) && styles.buttonInteractive
+            ]}
+            onPress={onLoginSuccess}
+          >
+            {({ hovered, pressed }) => (
+              <Text style={[styles.buttonText, (hovered || pressed) && styles.buttonTextInteractive]}>
+                Login
+              </Text>
+            )}
+          </Pressable>
 
           <TouchableOpacity
             style={styles.linkButton}
@@ -113,9 +123,17 @@ function createStyles(colors: ThemeColors) {
       alignItems: "center",
       marginTop: 8
     },
+    buttonInteractive: {
+      backgroundColor: colors.accentSoft,
+      borderWidth: 1,
+      borderColor: colors.accent
+    },
     buttonText: {
       color: "#fff",
       fontWeight: "700"
+    },
+    buttonTextInteractive: {
+      color: colors.accent
     },
     linkButton: {
       marginTop: 12

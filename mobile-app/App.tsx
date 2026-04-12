@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Platform, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
@@ -157,15 +157,27 @@ function AppContent() {
           authFlowScreen
         )}
 
-        <TouchableOpacity
-          style={[styles.themeToggle, isAuthenticated && styles.themeToggleAboveNav]}
+        <Pressable
+          style={({ hovered, pressed }) => [
+            styles.themeToggle,
+            isAuthenticated && styles.themeToggleAboveNav,
+            (hovered || pressed) && styles.themeToggleInteractive
+          ]}
           onPress={toggleTheme}
-          activeOpacity={0.85}
           accessibilityRole="button"
           accessibilityLabel={mode === "light" ? "Switch to dark mode" : "Switch to light mode"}
         >
-          <Text style={[styles.themeToggleIcon, { color: toggleIconColor }]}>{toggleIcon}</Text>
-        </TouchableOpacity>
+          {({ hovered, pressed }) => (
+            <Text
+              style={[
+                styles.themeToggleIcon,
+                { color: hovered || pressed ? colors.accent : toggleIconColor }
+              ]}
+            >
+              {toggleIcon}
+            </Text>
+          )}
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -260,6 +272,10 @@ function createStyles(colors: ThemeColors) {
     },
     themeToggleAboveNav: {
       bottom: 92
+    },
+    themeToggleInteractive: {
+      backgroundColor: colors.tileHover,
+      borderColor: colors.accent
     },
     themeToggleIcon: {
       color: colors.toggleText,

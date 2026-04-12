@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import React, { useMemo, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { StatCard } from "../components/StatCard";
 import { meals, recovery, user, workouts } from "../data/seed";
 import { buildCoachTip, getReadinessScore } from "../features/recommendations";
@@ -94,7 +94,7 @@ export function DashboardScreen() {
               </View>
             </View>
 
-            <View style={styles.centerTile}>
+            <InteractiveTile style={styles.centerTile}>
               <ActivityTile
                 title="Activity"
                 totalMinutes={activitySeries.totalMinutes}
@@ -102,7 +102,7 @@ export function DashboardScreen() {
                 labels={activitySeries.labels}
                 isCompact={false}
               />
-            </View>
+            </InteractiveTile>
 
             <View style={styles.sideColumn}>
               <View style={styles.sideTile}>
@@ -114,12 +114,12 @@ export function DashboardScreen() {
                 />
               </View>
 
-              <View style={[styles.sideTile, styles.coachCard]}>
+              <InteractiveTile style={[styles.sideTile, styles.coachCard]}>
                 <Text style={styles.coachTitle}>AI Coach Tip</Text>
                 <Text style={styles.coachText} numberOfLines={7}>
                   {coachTip}
                 </Text>
-              </View>
+              </InteractiveTile>
             </View>
           </View>
         ) : (
@@ -152,15 +152,15 @@ export function DashboardScreen() {
                 />
               </View>
 
-              <View style={[styles.tile, styles.coachCard]}>
+              <InteractiveTile style={[styles.tile, styles.coachCard]}>
                 <Text style={styles.coachTitle}>AI Coach Tip</Text>
                 <Text style={styles.coachText} numberOfLines={5}>
                   {coachTip}
                 </Text>
-              </View>
+              </InteractiveTile>
             </View>
 
-            <View style={styles.activityTileCompact}>
+            <InteractiveTile style={styles.activityTileCompact}>
               <ActivityTile
                 title="Activity"
                 totalMinutes={activitySeries.totalMinutes}
@@ -168,11 +168,32 @@ export function DashboardScreen() {
                 labels={activitySeries.labels}
                 isCompact
               />
-            </View>
+            </InteractiveTile>
           </>
         )}
       </View>
     </ScrollView>
+  );
+}
+
+type InteractiveTileProps = {
+  style: any;
+  children: React.ReactNode;
+};
+
+function InteractiveTile({ style, children }: InteractiveTileProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createInteractiveStyles(colors), [colors]);
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <Pressable
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      style={({ pressed }) => [style, (hovered || pressed) && styles.active]}
+    >
+      {children}
+    </Pressable>
   );
 }
 
@@ -365,6 +386,15 @@ function createActivityStyles(colors: ThemeColors, isCompact: boolean) {
       color: colors.mutetext,
       fontSize: 12,
       fontWeight: "600"
+    }
+  });
+}
+
+function createInteractiveStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    active: {
+      backgroundColor: colors.tileHover,
+      borderColor: colors.accent
     }
   });
 }

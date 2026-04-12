@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { workouts } from "../data/seed";
 import { useTheme } from "../theme/ThemeContext";
 import type { ThemeColors } from "../theme/colors";
@@ -33,7 +33,12 @@ export function WorkoutsScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.itemCard}>
+            <Pressable
+              style={({ hovered, pressed }) => [
+                styles.itemCard,
+                (hovered || pressed) && styles.itemCardInteractive
+              ]}
+            >
               <Text style={styles.itemTitle}>{item.title}</Text>
               <Text style={styles.meta}>
                 {item.type.toUpperCase()} • {item.durationMin} min
@@ -41,7 +46,7 @@ export function WorkoutsScreen() {
               <Text style={styles.metaSecondary}>
                 Effort {item.perceivedEffort}/5
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           )}
         />
       </View>
@@ -93,6 +98,10 @@ function createStyles(colors: ThemeColors, layout: LayoutConfig) {
       paddingHorizontal: layout.isWideLayout ? 20 : 18,
       borderLeftWidth: 4,
       borderLeftColor: colors.accent
+    },
+    itemCardInteractive: {
+      backgroundColor: colors.tileHover,
+      borderColor: colors.accent
     },
     itemTitle: {
       fontSize: layout.isWideLayout ? 20 : 18,

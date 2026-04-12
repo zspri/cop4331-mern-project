@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
+import React, { useMemo, useState } from "react";
+import { Pressable, StyleProp, StyleSheet, Text, ViewStyle } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import type { ThemeColors } from "../theme/colors";
 
@@ -14,13 +14,23 @@ type Props = {
 export function StatCard({ label, value, hint, square = false, containerStyle }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const [hovered, setHovered] = useState(false);
 
   return (
-    <View style={[styles.card, square && styles.cardSquare, containerStyle]}>
+    <Pressable
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      style={({ pressed }) => [
+        styles.card,
+        square && styles.cardSquare,
+        containerStyle,
+        (hovered || pressed) && styles.cardInteractive
+      ]}
+    >
       <Text style={[styles.label, square && styles.labelSquare]}>{label}</Text>
       <Text style={[styles.value, square && styles.valueSquare]}>{value}</Text>
       {hint ? <Text style={[styles.hint, square && styles.hintSquare]}>{hint}</Text> : null}
-    </View>
+    </Pressable>
   );
 }
 
@@ -40,6 +50,10 @@ function createStyles(colors: ThemeColors) {
       justifyContent: "space-between",
       paddingVertical: 18,
       paddingHorizontal: 16
+    },
+    cardInteractive: {
+      backgroundColor: colors.tileHover,
+      borderColor: colors.accent
     },
     label: {
       color: colors.mutetext,

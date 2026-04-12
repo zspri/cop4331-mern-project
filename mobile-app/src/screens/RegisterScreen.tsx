@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { Pressable, View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import type { ThemeColors } from "../theme/colors";
 
@@ -46,9 +46,19 @@ export function RegisterScreen({ onNavigate, onRegisterSuccess }: Props) {
             style={styles.input}
           />
 
-          <TouchableOpacity style={styles.button} onPress={onRegisterSuccess} activeOpacity={0.8}>
-            <Text style={styles.buttonText}>Create Account</Text>
-          </TouchableOpacity>
+          <Pressable
+            style={({ hovered, pressed }) => [
+              styles.button,
+              (hovered || pressed) && styles.buttonInteractive
+            ]}
+            onPress={onRegisterSuccess}
+          >
+            {({ hovered, pressed }) => (
+              <Text style={[styles.buttonText, (hovered || pressed) && styles.buttonTextInteractive]}>
+                Create Account
+              </Text>
+            )}
+          </Pressable>
 
           <TouchableOpacity
             style={styles.linkButton}
@@ -117,9 +127,17 @@ function createStyles(colors: ThemeColors) {
       alignItems: "center",
       marginTop: 8
     },
+    buttonInteractive: {
+      backgroundColor: colors.accentSoft,
+      borderWidth: 1,
+      borderColor: colors.accent
+    },
     buttonText: {
       color: "#fff",
       fontWeight: "700"
+    },
+    buttonTextInteractive: {
+      color: colors.accent
     },
     linkButton: {
       marginTop: 12

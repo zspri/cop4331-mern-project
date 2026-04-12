@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { meals } from "../data/seed";
 import { useTheme } from "../theme/ThemeContext";
 import type { ThemeColors } from "../theme/colors";
@@ -36,13 +36,18 @@ export function NutritionScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.list}
             renderItem={({ item }) => (
-              <TouchableOpacity style={styles.itemCard}>
+                <Pressable
+                  style={({ hovered, pressed }) => [
+                    styles.itemCard,
+                    (hovered || pressed) && styles.itemCardInteractive
+                  ]}
+                >
                 <Text style={styles.itemTitle}>{item.name}</Text>
                 <Text style={styles.meta}>{item.calories} kcal</Text>
                 <Text style={styles.metaSecondary}>
                   P {item.proteinG}g • C {item.carbsG}g • F {item.fatsG}g
                 </Text>
-              </TouchableOpacity>
+                </Pressable>
             )}
           />
         )}
@@ -95,6 +100,10 @@ function createStyles(colors: ThemeColors, layout: LayoutConfig) {
       paddingHorizontal: layout.isWideLayout ? 20 : 18,
       borderLeftWidth: 4,
       borderLeftColor: colors.accent
+    },
+    itemCardInteractive: {
+      backgroundColor: colors.tileHover,
+      borderColor: colors.accent
     },
     itemTitle: {
       fontSize: layout.isWideLayout ? 20 : 18,
