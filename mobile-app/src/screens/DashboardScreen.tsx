@@ -8,7 +8,11 @@ import type { ThemeColors } from "../theme/colors";
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
-export function DashboardScreen() {
+type Props = {
+  onLogout: () => void;
+};
+
+export function DashboardScreen({ onLogout }: Props) {
   const { colors } = useTheme();
   const { width, height } = useWindowDimensions();
 
@@ -69,7 +73,24 @@ export function DashboardScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.header}>Welcome back, {user.name}</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.header}>Welcome back, {user.name}</Text>
+          <Pressable
+            style={({ hovered, pressed }) => [
+              styles.logoutTile,
+              (hovered || pressed) && styles.logoutTileInteractive
+            ]}
+            onPress={onLogout}
+            accessibilityRole="button"
+            accessibilityLabel="Logout"
+          >
+            {({ hovered, pressed }) => (
+              <Text style={[styles.logoutText, (hovered || pressed) && styles.logoutTextInteractive]}>
+                Logout
+              </Text>
+            )}
+          </Pressable>
+        </View>
         <Text style={styles.subheader}>Daily Snapshot</Text>
 
         {isWideLayout ? (
@@ -258,15 +279,45 @@ function createStyles(colors: ThemeColors, layout: LayoutConfig) {
       gap: 12
     },
     header: {
-      marginTop: layout.isLandscape ? 0 : 8,
+      marginTop: 0,
       fontSize: layout.isWideLayout ? 32 : layout.isLandscape ? 28 : 24,
       fontWeight: "800",
-      color: colors.text
+      color: colors.text,
+      flexShrink: 1,
+      paddingRight: 12
+    },
+    headerRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginTop: layout.isLandscape ? 0 : 8
     },
     subheader: {
       marginTop: -4,
       fontSize: layout.isWideLayout ? 18 : layout.isLandscape ? 16 : 15,
       color: colors.mutetext
+    },
+    logoutTile: {
+      width: layout.isWideLayout ? 78 : 70,
+      height: layout.isWideLayout ? 39 : 35,
+      borderRadius: 14,
+      backgroundColor: colors.toggleBg,
+      borderWidth: 1,
+      borderColor: colors.toggleBorder,
+      alignItems: "center",
+      justifyContent: "center"
+    },
+    logoutTileInteractive: {
+      backgroundColor: colors.tileHover,
+      borderColor: colors.accent
+    },
+    logoutText: {
+      color: colors.toggleBorder,
+      fontWeight: "700",
+      fontSize: layout.isWideLayout ? 14 : 13
+    },
+    logoutTextInteractive: {
+      color: colors.toggleBorder
     },
     wideBoard: {
       width: "100%",

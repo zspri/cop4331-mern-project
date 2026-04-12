@@ -76,7 +76,7 @@ function AppContent() {
   const screen = useMemo(() => {
     if (tab === "workouts") return <WorkoutsScreen />;
     if (tab === "nutrition") return <NutritionScreen />;
-    return <DashboardScreen />;
+    return <DashboardScreen onLogout={() => setIsAuthenticated(false)} />;
   }, [tab]);
 
   const authFlowScreen = useMemo(() => {
