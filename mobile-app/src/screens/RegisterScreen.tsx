@@ -5,9 +5,10 @@ import type { ThemeColors } from "../theme/colors";
 
 type Props = {
     onNavigate: (screen: "login" | "register" | "forgot" | "reset") => void;
+  onRegisterSuccess: () => void;
 };
 
-export function RegisterScreen({onNavigate}: Props) {
+export function RegisterScreen({ onNavigate, onRegisterSuccess }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -45,7 +46,7 @@ export function RegisterScreen({onNavigate}: Props) {
             style={styles.input}
           />
 
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={onRegisterSuccess} activeOpacity={0.8}>
             <Text style={styles.buttonText}>Create Account</Text>
           </TouchableOpacity>
 

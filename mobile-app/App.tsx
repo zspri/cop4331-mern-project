@@ -46,7 +46,12 @@ function AppContent() {
     }
 
     if (authScreen === "register") {
-      return <RegisterScreen onNavigate={setAuthScreen} />;
+      return (
+        <RegisterScreen
+          onNavigate={setAuthScreen}
+          onRegisterSuccess={() => setIsAuthenticated(true)}
+        />
+      );
     }
 
     if (authScreen === "forgot") {
