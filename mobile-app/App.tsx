@@ -1,18 +1,30 @@
 import React, { useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { LoginScreen } from "./src/screens/LoginScreen";
-import { RegisterScreen } from "./src/screens/RegisterScreen";
-import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
-import { ResetPasswordScreen } from "./src/screens/ResetPasswordScreen";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
+import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
+import { LoginScreen } from "./src/screens/LoginScreen";
 import { NutritionScreen } from "./src/screens/NutritionScreen";
+import { RegisterScreen } from "./src/screens/RegisterScreen";
+import { ResetPasswordScreen } from "./src/screens/ResetPasswordScreen";
 import { WorkoutsScreen } from "./src/screens/WorkoutsScreen";
-import { colors } from "./src/theme/colors";
+import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
+import type { ThemeColors } from "./src/theme/colors";
 
 type Tab = "dashboard" | "workouts" | "nutrition";
 type AuthScreen = "login" | "register" | "forgot" | "reset";
 
 export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}
+
+function AppContent() {
+  const { colors, mode, toggleTheme } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const [tab, setTab] = useState<Tab>("dashboard");
   const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -23,7 +35,7 @@ export default function App() {
     return <DashboardScreen />;
   }, [tab]);
 
-  if (!isAuthenticated) {
+  const authFlowScreen = useMemo(() => {
     if (authScreen === "login") {
       return (
         <LoginScreen
@@ -42,115 +54,156 @@ export default function App() {
     }
 
     return <ResetPasswordScreen onNavigate={setAuthScreen} />;
-  }
+  }, [authScreen]);
+
+  const toggleLabel = mode === "light" ? "Dark" : "Light";
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.appShell}>
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <Text style={styles.brand}>MuscleMeter+</Text>
-            <Text style={styles.tagline}>Train smarter. Recover better.</Text>
-          </View>
-        </View>
+        {isAuthenticated ? (
+          <>
+            <View style={styles.header}>
+              <View style={styles.headerContent}>
+                <Text style={styles.brand}>MuscleMeter+</Text>
+                <Text style={styles.tagline}>Train smarter. Recover better.</Text>
+              </View>
+            </View>
 
-        <View style={styles.body}>{screen}</View>
+            <View style={styles.body}>{screen}</View>
 
-        <View style={styles.nav}>
-          <View style={styles.navContent}>
-            <TabButton label="Home" active={tab === "dashboard"} onPress={() => setTab("dashboard")} />
-            <TabButton label="Workouts" active={tab === "workouts"} onPress={() => setTab("workouts")} />
-            <TabButton label="Nutrition" active={tab === "nutrition"} onPress={() => setTab("nutrition")} />
-          </View>
-        </View>
+            <View style={styles.nav}>
+              <View style={styles.navContent}>
+                <TouchableOpacity
+                  onPress={() => setTab("dashboard")}
+                  style={[styles.tabBtn, tab === "dashboard" && styles.tabBtnActive]}
+                >
+                  <Text style={[styles.tabLabel, tab === "dashboard" && styles.tabLabelActive]}>
+                    Home
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setTab("workouts")}
+                  style={[styles.tabBtn, tab === "workouts" && styles.tabBtnActive]}
+                >
+                  <Text style={[styles.tabLabel, tab === "workouts" && styles.tabLabelActive]}>
+                    Workouts
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setTab("nutrition")}
+                  style={[styles.tabBtn, tab === "nutrition" && styles.tabBtnActive]}
+                >
+                  <Text style={[styles.tabLabel, tab === "nutrition" && styles.tabLabelActive]}>
+                    Nutrition
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </>
+        ) : (
+          authFlowScreen
+        )}
+
+        <TouchableOpacity style={styles.themeToggle} onPress={toggleTheme} activeOpacity={0.85}>
+          <Text style={styles.themeToggleText}>{toggleLabel}</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
 
-type TabButtonProps = {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-};
-
-function TabButton({ label, active, onPress }: TabButtonProps) {
-  return (
-    <TouchableOpacity onPress={onPress} style={[styles.tabBtn, active && styles.tabBtnActive]}>
-      <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>{label}</Text>
-    </TouchableOpacity>
-  );
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.bg
+    },
+    appShell: {
+      flex: 1,
+      backgroundColor: colors.bg
+    },
+    header: {
+      paddingTop: 14,
+      paddingBottom: 10
+    },
+    headerContent: {
+      width: "100%",
+      maxWidth: 760,
+      alignSelf: "center",
+      alignItems: "center",
+      paddingHorizontal: 0
+    },
+    brand: {
+      color: colors.accent,
+      fontSize: 28,
+      fontWeight: "800",
+      letterSpacing: -0.5
+    },
+    tagline: {
+      marginTop: 4,
+      color: colors.mutetext,
+      fontSize: 14,
+      fontWeight: "500"
+    },
+    body: {
+      flex: 1,
+      paddingBottom: 8
+    },
+    nav: {
+      backgroundColor: colors.card,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      paddingTop: 10,
+      paddingBottom: 14
+    },
+    navContent: {
+      width: "100%",
+      maxWidth: 760,
+      alignSelf: "center",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 8
+    },
+    tabBtn: {
+      flex: 1,
+      marginHorizontal: 6,
+      paddingVertical: 12,
+      borderRadius: 14,
+      alignItems: "center"
+    },
+    tabBtnActive: {
+      backgroundColor: colors.accentSoft
+    },
+    tabLabel: {
+      color: colors.mutetext,
+      fontSize: 15,
+      fontWeight: "600"
+    },
+    tabLabelActive: {
+      color: colors.accent,
+      fontWeight: "700"
+    },
+    themeToggle: {
+      position: "absolute",
+      right: 16,
+      bottom: 22,
+      backgroundColor: colors.toggleBg,
+      borderRadius: 20,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      zIndex: 5,
+      elevation: 4
+    },
+    themeToggleText: {
+      color: colors.toggleText,
+      fontWeight: "700",
+      fontSize: 13
+    }
+  });
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.bg
-  },
-  appShell: {
-    flex: 1,
-    backgroundColor: colors.bg
-  },
-  header: {
-    paddingTop: 14,
-    paddingBottom: 10
-  },
-  headerContent: {
-    width: "100%",
-    maxWidth: 760,
-    alignSelf: "center",
-    alignItems: "center",
-    paddingHorizontal: 0
-  },
-  brand: {
-    color: colors.accent,
-    fontSize: 28,
-    fontWeight: "800",
-    letterSpacing: -0.5
-  },
-  tagline: {
-    marginTop: 4,
-    color: colors.mutetext,
-    fontSize: 14,
-    fontWeight: "500"
-  },
-  body: {
-    flex: 1,
-    paddingBottom: 8
-  },
-  nav: {
-    backgroundColor: colors.card,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: 10,
-    paddingBottom: 14
-  },
-  navContent: {
-    width: "100%",
-    maxWidth: 760,
-    alignSelf: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 8
-  },
-  tabBtn: {
-    flex: 1,
-    marginHorizontal: 6,
-    paddingVertical: 12,
-    borderRadius: 14,
-    alignItems: "center"
-  },
-  tabBtnActive: {
-    backgroundColor: colors.accentSoft
-  },
-  tabLabel: {
-    color: colors.mutetext,
-    fontSize: 15,
-    fontWeight: "600"
-  },
-  tabLabelActive: {
-    color: colors.accent,
-    fontWeight: "700"
-  }
-});

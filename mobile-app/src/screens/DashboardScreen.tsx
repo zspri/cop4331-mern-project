@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { StatCard } from "../components/StatCard";
 import { meals, recovery, user, workouts } from "../data/seed";
 import { buildCoachTip, getReadinessScore } from "../features/recommendations";
-import { colors } from "../theme/colors";
+import { useTheme } from "../theme/ThemeContext";
+import type { ThemeColors } from "../theme/colors";
 
 export function DashboardScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const today = "2026-03-26";
   const todaysWorkouts = workouts.filter((w) => w.date === today);
   const todaysMeals = meals.filter((m) => m.date === today);
@@ -36,52 +40,54 @@ export function DashboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 24,
-    backgroundColor: colors.bg
-  },
-  content: {
-    width: "100%",
-    maxWidth: 760,
-    alignSelf: "center",
-    gap: 14
-  },
-  header: {
-    marginTop: 8,
-    fontSize: 24,
-    fontWeight: "800",
-    color: colors.text
-  },
-  subheader: {
-    marginTop: -4,
-    fontSize: 15,
-    color: colors.mutetext
-  },
-  grid: {
-    gap: 12
-  },
-  coachCard: {
-    backgroundColor: colors.accentSoft,
-    borderRadius: 18,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: "#99F6E4",
-    marginTop: 4
-  },
-  coachTitle: {
-    color: colors.accent,
-    fontSize: 13,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    marginBottom: 10,
-    letterSpacing: 0.4
-  },
-  coachText: {
-    color: colors.text,
-    fontSize: 15,
-    lineHeight: 22
-  }
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      paddingHorizontal: 16,
+      paddingTop: 8,
+      paddingBottom: 24,
+      backgroundColor: colors.bg
+    },
+    content: {
+      width: "100%",
+      maxWidth: 760,
+      alignSelf: "center",
+      gap: 14
+    },
+    header: {
+      marginTop: 8,
+      fontSize: 24,
+      fontWeight: "800",
+      color: colors.text
+    },
+    subheader: {
+      marginTop: -4,
+      fontSize: 15,
+      color: colors.mutetext
+    },
+    grid: {
+      gap: 12
+    },
+    coachCard: {
+      backgroundColor: colors.accentSoft,
+      borderRadius: 18,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: colors.coachBorder,
+      marginTop: 4
+    },
+    coachTitle: {
+      color: colors.accent,
+      fontSize: 13,
+      fontWeight: "700",
+      textTransform: "uppercase",
+      marginBottom: 10,
+      letterSpacing: 0.4
+    },
+    coachText: {
+      color: colors.text,
+      fontSize: 15,
+      lineHeight: 22
+    }
+  });
+}
