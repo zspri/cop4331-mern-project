@@ -49,7 +49,8 @@ function createStyles(colors: ThemeColors) {
       letterSpacing: 0.6
     },
     labelSquare: {
-      fontSize: 13
+      fontSize: 13,
+      color: colors.accent
     },
     value: {
       color: colors.text,

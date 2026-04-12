@@ -1,12 +1,26 @@
 import React, { useMemo } from "react";
-import { FlatList, StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import { workouts } from "../data/seed";
 import { useTheme } from "../theme/ThemeContext";
 import type { ThemeColors } from "../theme/colors";
 
 export function WorkoutsScreen() {
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { width, height } = useWindowDimensions();
+
+  const isLandscape = width > height;
+  const isWideLayout = isLandscape && width >= 900;
+
+  const styles = useMemo(
+    () =>
+      createStyles(colors, {
+        horizontalPadding: isWideLayout ? 26 : isLandscape ? 22 : 16,
+        contentMaxWidth: isWideLayout ? 1360 : isLandscape ? 980 : 760,
+        isWideLayout,
+        isLandscape
+      }),
+    [colors, isWideLayout, isLandscape]
+  );
 
   return (
     <View style={styles.container}>
@@ -35,46 +49,53 @@ export function WorkoutsScreen() {
   );
 }
 
-function createStyles(colors: ThemeColors) {
+type LayoutConfig = {
+  horizontalPadding: number;
+  contentMaxWidth: number;
+  isWideLayout: boolean;
+  isLandscape: boolean;
+};
+
+function createStyles(colors: ThemeColors, layout: LayoutConfig) {
   return StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.bg,
-      paddingHorizontal: 16,
-      paddingTop: 8,
+      paddingHorizontal: layout.horizontalPadding,
+      paddingTop: layout.isLandscape ? 14 : 8,
       paddingBottom: 24
     },
     content: {
       width: "100%",
-      maxWidth: 760,
+      maxWidth: layout.contentMaxWidth,
       alignSelf: "center"
     },
     title: {
-      fontSize: 24,
+      fontSize: layout.isWideLayout ? 32 : layout.isLandscape ? 28 : 24,
       fontWeight: "800",
       color: colors.text
     },
     subtitle: {
       marginTop: 4,
       marginBottom: 16,
-      fontSize: 15,
+      fontSize: layout.isWideLayout ? 18 : layout.isLandscape ? 16 : 15,
       color: colors.mutetext
     },
     list: {
-      gap: 14
+      gap: layout.isWideLayout ? 16 : 14
     },
     itemCard: {
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 18,
-      paddingVertical: 16,
-      paddingHorizontal: 18,
+      paddingVertical: layout.isWideLayout ? 18 : 16,
+      paddingHorizontal: layout.isWideLayout ? 20 : 18,
       borderLeftWidth: 4,
       borderLeftColor: colors.accent
     },
     itemTitle: {
-      fontSize: 18,
+      fontSize: layout.isWideLayout ? 20 : 18,
       color: colors.text,
       fontWeight: "800"
     },
