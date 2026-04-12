@@ -56,7 +56,8 @@ function AppContent() {
     return <ResetPasswordScreen onNavigate={setAuthScreen} />;
   }, [authScreen]);
 
-  const toggleLabel = mode === "light" ? "Dark" : "Light";
+  const toggleIcon = mode === "light" ? "☀" : "☾";
+  const toggleIconColor = mode === "light" ? "#6B7280" : "#A855F7";
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -107,8 +108,14 @@ function AppContent() {
           authFlowScreen
         )}
 
-        <TouchableOpacity style={styles.themeToggle} onPress={toggleTheme} activeOpacity={0.85}>
-          <Text style={styles.themeToggleText}>{toggleLabel}</Text>
+        <TouchableOpacity
+          style={styles.themeToggle}
+          onPress={toggleTheme}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel={mode === "light" ? "Switch to dark mode" : "Switch to light mode"}
+        >
+          <Text style={[styles.themeToggleIcon, { color: toggleIconColor }]}>{toggleIcon}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -192,18 +199,21 @@ function createStyles(colors: ThemeColors) {
       right: 16,
       bottom: 22,
       backgroundColor: colors.toggleBg,
-      borderRadius: 20,
-      paddingVertical: 10,
-      paddingHorizontal: 14,
+      borderRadius: 999,
+      width: 48,
+      height: 48,
+      alignItems: "center",
+      justifyContent: "center",
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.toggleBorder,
       zIndex: 5,
       elevation: 4
     },
-    themeToggleText: {
+    themeToggleIcon: {
       color: colors.toggleText,
-      fontWeight: "700",
-      fontSize: 13
+      fontWeight: "800",
+      fontSize: 20,
+      lineHeight: 20
     }
   });
 }

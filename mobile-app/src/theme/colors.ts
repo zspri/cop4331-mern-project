@@ -11,6 +11,7 @@ export type ThemeColors = {
   border: string;
   coachBorder: string;
   toggleBg: string;
+  toggleBorder: string;
   toggleText: string;
 };
 
@@ -25,8 +26,9 @@ export const themeColors: Record<ThemeMode, ThemeColors> = {
     warning: "#F59E0B",
     border: "#E4E7EB",
     coachBorder: "#99F6E4",
-    toggleBg: "#10141A",
-    toggleText: "#FFFFFF"
+    toggleBg: "#FFFFFF",
+    toggleBorder: "#D1D5DB",
+    toggleText: "#111827"
   },
   dark: {
     bg: "#09080F",
@@ -38,7 +40,8 @@ export const themeColors: Record<ThemeMode, ThemeColors> = {
     warning: "#F59E0B",
     border: "#3A2A52",
     coachBorder: "#5B3A82",
-    toggleBg: "#F3EEFF",
-    toggleText: "#1A1228"
+    toggleBg: "#0B0713",
+    toggleBorder: "#A855F7",
+    toggleText: "#F5F3FF"
   }
 };
