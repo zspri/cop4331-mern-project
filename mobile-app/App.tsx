@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
@@ -24,6 +24,50 @@ export default function App() {
 function AppContent() {
   const { colors, mode, toggleTheme } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof document === "undefined") {
+      return;
+    }
+
+    const styleId = "mm-themed-scrollbar";
+    const existing = document.getElementById(styleId);
+
+    const track = colors.bg;
+    const thumb = mode === "dark" ? colors.accent : colors.border;
+
+    const css = `
+      html, body {
+        scrollbar-width: thin;
+        scrollbar-color: ${thumb} ${track};
+      }
+
+      ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: ${track};
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: ${thumb};
+        border-radius: 999px;
+        border: 3px solid ${track};
+      }
+    `;
+
+    if (existing) {
+      existing.textContent = css;
+      return;
+    }
+
+    const style = document.createElement("style");
+    style.id = styleId;
+    style.textContent = css;
+    document.head.appendChild(style);
+  }, [colors.bg, colors.border, colors.accent, mode]);
 
   const [tab, setTab] = useState<Tab>("dashboard");
   const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
