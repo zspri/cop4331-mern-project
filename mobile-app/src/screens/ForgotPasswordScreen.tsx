@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, useWindowDimensions } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import type { ThemeColors } from "../theme/colors";
 
@@ -9,19 +9,32 @@ type Props = {
 
 export function ForgotPasswordScreen({onNavigate}: Props) {
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { width } = useWindowDimensions();
+  const isWideLayout = width >= 900;
+
+  const styles = useMemo(() => createStyles(colors, isWideLayout), [colors, isWideLayout]);
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.brand}>MuscleMeter+</Text>
-        <Text style={styles.tagline}>Train smarter. Recover better.</Text>
+        {isWideLayout ? (
+          <View style={styles.heroPane}>
+            <Text style={styles.heroBrand}>MuscleMeter+</Text>
+            <Text style={styles.heroTagline}>Train smarter. Recover better.</Text>
+          </View>
+        ) : (
+          <View style={styles.heroCompact}>
+            <Text style={styles.brand}>MuscleMeter+</Text>
+            <Text style={styles.tagline}>Train smarter. Recover better.</Text>
+          </View>
+        )}
 
-        <View style={styles.card}>
-          <Text style={styles.title}>Forgot password</Text>
-          <Text style={styles.description}>
-            Enter your email and we’ll send you a reset link.
-          </Text>
+        <View style={styles.formPane}>
+          <View style={styles.card}>
+            <Text style={styles.title}>Forgot password</Text>
+            <Text style={styles.description}>
+              Enter your email and we’ll send you a reset link.
+            </Text>
 
           <TextInput
             placeholder="Email"
@@ -40,13 +53,14 @@ export function ForgotPasswordScreen({onNavigate}: Props) {
           >       
             <Text style={styles.link}>Back to login</Text>
           </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(colors: ThemeColors, isWideLayout: boolean) {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -56,14 +70,40 @@ function createStyles(colors: ThemeColors) {
     },
     content: {
       width: "100%",
-      maxWidth: 420,
-      padding: 20,
+      maxWidth: isWideLayout ? 1180 : 420,
+      paddingHorizontal: 20,
+      paddingVertical: isWideLayout ? 28 : 20,
+      flexDirection: isWideLayout ? "row" : "column",
+      alignItems: isWideLayout ? "stretch" : "center",
+      columnGap: isWideLayout ? 28 : 0
+    },
+    heroPane: {
+      flex: 1,
+      justifyContent: "center",
+      paddingRight: 14
+    },
+    heroCompact: {
       alignItems: "center"
+    },
+    formPane: {
+      width: isWideLayout ? 430 : "100%",
+      justifyContent: "center"
     },
     brand: {
       fontSize: 28,
       fontWeight: "800",
       color: colors.accent
+    },
+    heroBrand: {
+      fontSize: 84,
+      fontWeight: "900",
+      color: colors.accent,
+      letterSpacing: -0.7
+    },
+    heroTagline: {
+      marginTop: 8,
+      fontSize: 42,
+      color: colors.mutetext
     },
     tagline: {
       fontSize: 14,
