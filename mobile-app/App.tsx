@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
-import { Platform, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
+import { Platform, Pressable, SafeAreaView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
@@ -9,7 +8,7 @@ import { RegisterScreen } from "./src/screens/RegisterScreen";
 import { ResetPasswordScreen } from "./src/screens/ResetPasswordScreen";
 import { WorkoutsScreen } from "./src/screens/WorkoutsScreen";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
-import type { ThemeColors } from "./src/theme/colors";
+import type { ThemeColors, ThemeMode } from "./src/theme/colors";
 
 type Tab = "dashboard" | "workouts" | "nutrition";
 type AuthScreen = "login" | "register" | "forgot" | "reset";
@@ -48,6 +47,20 @@ function AppContent() {
         scrollbar-color: ${thumb} ${track};
       }
 
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover,
+      input:-webkit-autofill:focus,
+      textarea:-webkit-autofill,
+      textarea:-webkit-autofill:hover,
+      textarea:-webkit-autofill:focus {
+        -webkit-text-fill-color: ${colors.text} !important;
+        caret-color: ${colors.text};
+        -webkit-box-shadow: 0 0 0 1000px ${colors.bg} inset !important;
+        box-shadow: 0 0 0 1000px ${colors.bg} inset !important;
+        border: 1px solid ${colors.border} !important;
+        transition: background-color 9999s ease-out 0s;
+      }
+
       ::-webkit-scrollbar {
         width: 12px;
         height: 12px;
@@ -73,7 +86,7 @@ function AppContent() {
     style.id = styleId;
     style.textContent = css;
     doc.head.appendChild(style);
-  }, [colors.bg, colors.border, colors.accent, mode]);
+  }, [colors.bg, colors.border, colors.accent, colors.text, mode]);
 
   const [tab, setTab] = useState<Tab>("dashboard");
   const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
@@ -89,11 +102,19 @@ function AppContent() {
     setAuthScreen("login");
   };
 
+  const handleToggleTheme = () => {
+    toggleTheme();
+  };
+
   const screen = useMemo(() => {
-    if (tab === "workouts") return <WorkoutsScreen currentUser={currentUser} token={token} />;
-    if (tab === "nutrition") return <NutritionScreen currentUser={currentUser} token={token} />;
-    return <DashboardScreen currentUser={currentUser} token={token} onLogout={handleLogout} />;
-  }, [tab, currentUser, token]);
+    if (tab === "workouts") {
+      return <WorkoutsScreen currentUser={currentUser} token={token} mode={mode as ThemeMode} onToggleTheme={handleToggleTheme} />;
+    }
+    if (tab === "nutrition") {
+      return <NutritionScreen currentUser={currentUser} token={token} mode={mode as ThemeMode} onToggleTheme={handleToggleTheme} />;
+    }
+    return <DashboardScreen currentUser={currentUser} token={token} onLogout={handleLogout} mode={mode as ThemeMode} onToggleTheme={handleToggleTheme} />;
+  }, [tab, currentUser, token, mode]);
 
   const authFlowScreen = useMemo(() => {
     if (authScreen === "login") {
@@ -124,9 +145,6 @@ function AppContent() {
     return <ResetPasswordScreen onNavigate={setAuthScreen} />;
   }, [authScreen]);
 
-  const toggleIconName = mode === "light" ? "sunny-outline" : "moon-outline";
-  const toggleIconColor = mode === "light" ? "#6B7280" : "#A855F7";
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.appShell}>
@@ -151,32 +169,50 @@ function AppContent() {
 
             <View style={styles.nav}>
               <View style={styles.navContent}>
-                <TouchableOpacity
+                <Pressable
                   onPress={() => setTab("dashboard")}
-                  style={[styles.tabBtn, tab === "dashboard" && styles.tabBtnActive]}
+                  style={({ hovered, pressed }: any) => [
+                    styles.tabBtn,
+                    (hovered || pressed) && styles.tabBtnInteractive,
+                    tab === "dashboard" && styles.tabBtnActive,
+                  ]}
                 >
-                  <Text style={[styles.tabLabel, tab === "dashboard" && styles.tabLabelActive]}>
-                    Home
-                  </Text>
-                </TouchableOpacity>
+                  {({ hovered, pressed }: any) => (
+                    <Text style={[styles.tabLabel, tab === "dashboard" && styles.tabLabelActive, (hovered || pressed) && tab !== "dashboard" && styles.tabLabelInteractive]}>
+                      Home
+                    </Text>
+                  )}
+                </Pressable>
 
-                <TouchableOpacity
+                <Pressable
                   onPress={() => setTab("workouts")}
-                  style={[styles.tabBtn, tab === "workouts" && styles.tabBtnActive]}
+                  style={({ hovered, pressed }: any) => [
+                    styles.tabBtn,
+                    (hovered || pressed) && styles.tabBtnInteractive,
+                    tab === "workouts" && styles.tabBtnActive,
+                  ]}
                 >
-                  <Text style={[styles.tabLabel, tab === "workouts" && styles.tabLabelActive]}>
-                    Workouts
-                  </Text>
-                </TouchableOpacity>
+                  {({ hovered, pressed }: any) => (
+                    <Text style={[styles.tabLabel, tab === "workouts" && styles.tabLabelActive, (hovered || pressed) && tab !== "workouts" && styles.tabLabelInteractive]}>
+                      Workouts
+                    </Text>
+                  )}
+                </Pressable>
 
-                <TouchableOpacity
+                <Pressable
                   onPress={() => setTab("nutrition")}
-                  style={[styles.tabBtn, tab === "nutrition" && styles.tabBtnActive]}
+                  style={({ hovered, pressed }: any) => [
+                    styles.tabBtn,
+                    (hovered || pressed) && styles.tabBtnInteractive,
+                    tab === "nutrition" && styles.tabBtnActive,
+                  ]}
                 >
-                  <Text style={[styles.tabLabel, tab === "nutrition" && styles.tabLabelActive]}>
-                    Nutrition
-                  </Text>
-                </TouchableOpacity>
+                  {({ hovered, pressed }: any) => (
+                    <Text style={[styles.tabLabel, tab === "nutrition" && styles.tabLabelActive, (hovered || pressed) && tab !== "nutrition" && styles.tabLabelInteractive]}>
+                      Nutrition
+                    </Text>
+                  )}
+                </Pressable>
               </View>
             </View>
           </>
@@ -184,23 +220,6 @@ function AppContent() {
           authFlowScreen
         )}
 
-        <Pressable
-          style={({ hovered, pressed }: any) => [
-            styles.themeToggle,
-            isAuthenticated && styles.themeToggleAboveNav,
-            (hovered || pressed) && styles.themeToggleInteractive
-          ]}
-          onPress={toggleTheme}
-          accessibilityRole="button"
-          accessibilityLabel={mode === "light" ? "Switch to dark mode" : "Switch to light mode"}
-        >
-          <Ionicons
-            name={toggleIconName}
-            size={22}
-            color={toggleIconColor}
-            style={styles.themeToggleIcon}
-          />
-        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -285,6 +304,11 @@ function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: 
       borderRadius: 14,
       alignItems: "center"
     },
+    tabBtnInteractive: {
+      backgroundColor: colors.tileHover,
+      borderWidth: 1,
+      borderColor: colors.accent + "55"
+    },
     tabBtnActive: {
       backgroundColor: colors.accentSoft
     },
@@ -297,30 +321,8 @@ function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: 
       color: colors.accent,
       fontWeight: "700"
     },
-    themeToggle: {
-      position: "absolute",
-      right: 16,
-      bottom: 22,
-      backgroundColor: colors.toggleBg,
-      borderWidth: 1,
-      borderColor: colors.toggleBorder,
-      width: 48,
-      height: 48,
-      borderRadius: 999,
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 5,
-      elevation: 4
+    tabLabelInteractive: {
+      color: colors.accent
     },
-    themeToggleAboveNav: {
-      bottom: 92
-    },
-    themeToggleInteractive: {
-      backgroundColor: colors.tileHover,
-      borderColor: colors.accent
-    },
-    themeToggleIcon: {
-      lineHeight: 22
-    }
   });
 }

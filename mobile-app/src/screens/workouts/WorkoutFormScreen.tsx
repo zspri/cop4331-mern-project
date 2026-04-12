@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   TextInput,
   ActivityIndicator,
@@ -40,9 +40,9 @@ export function WorkoutFormScreen({
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.content}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <Pressable onPress={onBack} style={({ hovered, pressed }: any) => [styles.backBtn, (hovered || pressed) && styles.backBtnInteractive]}>
           <Text style={styles.backBtnText}>← Back</Text>
-        </TouchableOpacity>
+        </Pressable>
 
         <Text style={styles.title}>{isEdit ? "Edit Workout" : "New Workout"}</Text>
 
@@ -81,9 +81,9 @@ export function WorkoutFormScreen({
           <View key={idx} style={styles.exerciseFormCard}>
             <View style={styles.exerciseFormHeader}>
               <Text style={styles.exerciseFormTitle}>Exercise {idx + 1}</Text>
-              <TouchableOpacity onPress={() => onRemoveExercise(idx)}>
+              <Pressable onPress={() => onRemoveExercise(idx)} style={({ hovered, pressed }: any) => [(hovered || pressed) && styles.removeTextInteractive]}>
                 <Text style={styles.removeText}>Remove</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
             <TextInput
               style={styles.input}
@@ -111,17 +111,17 @@ export function WorkoutFormScreen({
           </View>
         ))}
 
-        <TouchableOpacity style={styles.addExerciseBtn} onPress={onAddExercise}>
+        <Pressable style={({ hovered, pressed }: any) => [styles.addExerciseBtn, hovered && styles.addExerciseBtnHover, pressed && styles.addExerciseBtnPressed]} onPress={onAddExercise}>
           <Text style={styles.addExerciseBtnText}>+ Add Exercise</Text>
-        </TouchableOpacity>
+        </Pressable>
 
-        <TouchableOpacity style={styles.submitBtn} onPress={onSubmit} disabled={loading}>
+        <Pressable style={({ hovered, pressed }: any) => [styles.submitBtn, hovered && styles.submitBtnHover, pressed && styles.submitBtnPressed, loading && styles.submitBtnDisabled]} onPress={onSubmit} disabled={loading}>
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.submitBtnText}>{isEdit ? "Save Changes" : "Create Workout"}</Text>
           )}
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </ScrollView>
   );
@@ -132,6 +132,7 @@ function createStyles(colors: ThemeColors) {
     scrollContainer: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, flexGrow: 1 },
     content: { width: "100%", maxWidth: 900, alignSelf: "center", flex: 1 },
     backBtn: { marginBottom: 12 },
+    backBtnInteractive: { opacity: 0.75 },
     backBtnText: { color: colors.accent, fontSize: 15, fontWeight: "700" },
     title: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 16 },
     sectionTitle: { fontSize: 18, fontWeight: "700", color: colors.text, marginTop: 20, marginBottom: 10 },
@@ -143,11 +144,17 @@ function createStyles(colors: ThemeColors) {
     exerciseFormHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
     exerciseFormTitle: { fontWeight: "700", color: colors.text, fontSize: 15 },
     removeText: { color: "#E11D48", fontWeight: "600", fontSize: 13 },
+    removeTextInteractive: { opacity: 0.7 },
     exerciseFormRow: { flexDirection: "row", gap: 8 },
     exerciseFormField: { flex: 1 },
     addExerciseBtn: { backgroundColor: colors.accentSoft, paddingVertical: 14, borderRadius: 14, alignItems: "center", borderWidth: 1, borderColor: colors.accent + "40", marginTop: 4, marginBottom: 12 },
+    addExerciseBtnHover: { backgroundColor: colors.tileHover, borderColor: colors.accent + "55" },
+    addExerciseBtnPressed: { backgroundColor: colors.tilePress, borderColor: colors.accent + "70" },
     addExerciseBtnText: { color: colors.accent, fontWeight: "700", fontSize: 15 },
     submitBtn: { backgroundColor: colors.accent, paddingVertical: 16, borderRadius: 16, alignItems: "center", shadowColor: colors.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 5 },
+    submitBtnHover: { opacity: 0.92 },
+    submitBtnPressed: { opacity: 0.82 },
+    submitBtnDisabled: { opacity: 0.7 },
     submitBtnText: { color: "#fff", fontWeight: "800", fontSize: 16 },
   });
 }

@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
 } from "react-native";
 import { useTheme } from "../../theme/ThemeContext";
@@ -33,9 +33,9 @@ export function WorkoutDetailScreen({ workout, onBack, onEdit, onDelete }: Props
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.content}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <Pressable onPress={onBack} style={({ hovered, pressed }: any) => [styles.backBtn, (hovered || pressed) && styles.backBtnInteractive]}>
           <Text style={styles.backBtnText}>← Back</Text>
-        </TouchableOpacity>
+        </Pressable>
 
         <Text style={styles.title}>{workout.name}</Text>
         <View style={styles.badgeRow}>
@@ -75,12 +75,12 @@ export function WorkoutDetailScreen({ workout, onBack, onEdit, onDelete }: Props
         )}
 
         <View style={styles.actionRow}>
-          <TouchableOpacity style={styles.editActionBtn} onPress={() => onEdit(workout)}>
+          <Pressable style={({ hovered, pressed }: any) => [styles.editActionBtn, hovered && styles.editActionBtnHover, pressed && styles.editActionBtnPressed]} onPress={() => onEdit(workout)}>
             <Text style={styles.editActionText}>Edit Workout</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteActionBtn} onPress={() => onDelete(workout)}>
+          </Pressable>
+          <Pressable style={({ hovered, pressed }: any) => [styles.deleteActionBtn, hovered && styles.deleteActionBtnHover, pressed && styles.deleteActionBtnPressed]} onPress={() => onDelete(workout)}>
             <Text style={styles.deleteActionText}>Delete</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </ScrollView>
@@ -92,6 +92,7 @@ function createStyles(colors: ThemeColors) {
     scrollContainer: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, flexGrow: 1 },
     content: { width: "100%", maxWidth: 900, alignSelf: "center", flex: 1 },
     backBtn: { marginBottom: 12 },
+    backBtnInteractive: { opacity: 0.75 },
     backBtnText: { color: colors.accent, fontSize: 15, fontWeight: "700" },
     title: { fontSize: 24, fontWeight: "800", color: colors.text },
     badgeRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 6, marginBottom: 14 },
@@ -111,8 +112,12 @@ function createStyles(colors: ThemeColors) {
     statPillValue: { fontSize: 14, fontWeight: "800", color: colors.text },
     actionRow: { flexDirection: "row", gap: 12, marginTop: 24 },
     editActionBtn: { flex: 1, backgroundColor: colors.accentSoft, paddingVertical: 14, borderRadius: 14, alignItems: "center", borderWidth: 1, borderColor: colors.accent + "40" },
+    editActionBtnHover: { backgroundColor: colors.tileHover, borderColor: colors.accent + "55" },
+    editActionBtnPressed: { backgroundColor: colors.tilePress, borderColor: colors.accent + "70" },
     editActionText: { color: colors.accent, fontWeight: "700", fontSize: 15 },
     deleteActionBtn: { backgroundColor: "#FFF1F2", paddingVertical: 14, paddingHorizontal: 20, borderRadius: 14, alignItems: "center", borderWidth: 1, borderColor: "#FECDD3" },
+    deleteActionBtnHover: { backgroundColor: "#FFE4E8", borderColor: "#FDA4AF" },
+    deleteActionBtnPressed: { backgroundColor: "#FFD5DD", borderColor: "#FB7185" },
     deleteActionText: { color: "#E11D48", fontWeight: "700", fontSize: 15 },
   });
 }

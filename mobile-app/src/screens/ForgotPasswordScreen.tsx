@@ -3,10 +3,10 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
   useWindowDimensions
 } from "react-native";
@@ -19,7 +19,7 @@ type Props = {
 };
 
 export function ForgotPasswordScreen({ onNavigate }: Props) {
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const { width, height } = useWindowDimensions();
   const isWideLayout = width >= 900;
   const isMobileLandscape = Platform.OS !== "web" && width > height;
@@ -95,22 +95,32 @@ export function ForgotPasswordScreen({ onNavigate }: Props) {
               keyboardType="email-address"
             />
 
-            <TouchableOpacity
-              style={styles.button}
-              activeOpacity={0.8}
+            <Pressable
+              style={({ hovered, pressed }: any) => [
+                styles.button,
+                (hovered || pressed) && styles.buttonInteractive,
+                loading && styles.buttonDisabled
+              ]}
               onPress={handleForgot}
               disabled={loading}
             >
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Send Reset PIN</Text>}
-            </TouchableOpacity>
+              {({ hovered, pressed }: any) => {
+                const isInteractive = hovered || pressed;
+                const useLightInvert = mode === "light" && isInteractive;
+                return loading ? (
+                  <ActivityIndicator color={useLightInvert ? colors.accent : "#fff"} />
+                ) : (
+                  <Text style={[styles.buttonText, useLightInvert && styles.buttonTextLightInteractive]}>Send Reset PIN</Text>
+                );
+              }}
+            </Pressable>
 
-            <TouchableOpacity
-              style={styles.linkButton}
+            <Pressable
+              style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
               onPress={() => onNavigate("login")}
-              activeOpacity={0.7}
             >
               <Text style={styles.link}>Back to login</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -209,12 +219,26 @@ function createStyles(
       alignItems: "center",
       marginTop: 12
     },
+    buttonInteractive: {
+      backgroundColor: colors.accentSoft,
+      borderWidth: 1,
+      borderColor: colors.accent
+    },
+    buttonDisabled: {
+      opacity: 0.7
+    },
     buttonText: {
       color: "#fff",
       fontWeight: "700"
     },
+    buttonTextLightInteractive: {
+      color: colors.accent
+    },
     linkButton: {
       marginTop: 12
+    },
+    linkButtonInteractive: {
+      opacity: 0.75
     },
     link: {
       color: colors.accent,

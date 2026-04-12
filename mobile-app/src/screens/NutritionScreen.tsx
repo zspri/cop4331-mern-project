@@ -5,6 +5,7 @@ import { MealDetailScreen } from "./nutrition/MealDetailScreen";
 import { MealFormScreen } from "./nutrition/MealFormScreen";
 import { NutritionProgressScreen } from "./nutrition/NutritionProgressScreen";
 import { Meal, NutritionSubView, authHeaders } from "./nutrition/nutritionTypes";
+import type { ThemeMode } from "../theme/colors";
 
 const API_URL =
   Platform.OS === "android"
@@ -14,9 +15,11 @@ const API_URL =
 type Props = {
   token: string | null;
   currentUser: any;
+  mode: ThemeMode;
+  onToggleTheme: () => void;
 };
 
-export function NutritionScreen({ token, currentUser }: Props) {
+export function NutritionScreen({ token, currentUser, mode, onToggleTheme }: Props) {
   const [subView, setSubView] = useState<NutritionSubView>("list");
   const [meals, setMeals] = useState<Meal[]>([]);
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
@@ -152,6 +155,8 @@ export function NutritionScreen({ token, currentUser }: Props) {
         onView={openView}
         onEdit={openEdit}
         onProgress={() => setSubView("graph")}
+        mode={mode}
+        onToggleTheme={onToggleTheme}
       />
     );
 

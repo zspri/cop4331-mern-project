@@ -5,6 +5,7 @@ import { WorkoutDetailScreen } from "./workouts/WorkoutDetailScreen";
 import { WorkoutFormScreen } from "./workouts/WorkoutFormScreen";
 import { WorkoutProgressScreen } from "./workouts/WorkoutProgressScreen";
 import { Workout, WorkoutSubView, Exercise, authHeaders } from "./workouts/workoutTypes";
+import type { ThemeMode } from "../theme/colors";
 
 const API_URL =
   Platform.OS === "android"
@@ -14,9 +15,11 @@ const API_URL =
 type Props = {
   token: string | null;
   currentUser: any;
+  mode: ThemeMode;
+  onToggleTheme: () => void;
 };
 
-export function WorkoutsScreen({ token, currentUser }: Props) {
+export function WorkoutsScreen({ token, currentUser, mode, onToggleTheme }: Props) {
   const [subView, setSubView] = useState<WorkoutSubView>("list");
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
@@ -180,6 +183,8 @@ export function WorkoutsScreen({ token, currentUser }: Props) {
         onView={openView}
         onEdit={openEdit}
         onProgress={() => setSubView("graph")}
+        mode={mode}
+        onToggleTheme={onToggleTheme}
       />
     );
 

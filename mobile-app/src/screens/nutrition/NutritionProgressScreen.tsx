@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 import { useTheme } from "../../theme/ThemeContext";
 import type { ThemeColors } from "../../theme/colors";
 import { Meal, PROTEIN_GOAL, CALORIES_GOAL } from "./nutritionTypes";
@@ -111,9 +111,9 @@ export function NutritionProgressScreen({ meals, onBack }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.content}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <Pressable onPress={onBack} style={({ hovered, pressed }: any) => [styles.backBtn, (hovered || pressed) && styles.backBtnInteractive]}>
           <Text style={styles.backBtnText}>← Back</Text>
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.title}>Nutrition Progress</Text>
         <Text style={styles.subtitle}>Daily averages per week</Text>
 
@@ -144,6 +144,7 @@ function createStyles(colors: ThemeColors) {
     scrollContainer: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, flexGrow: 1 },
     content: { width: "100%", maxWidth: 900, alignSelf: "center", flex: 1 },
     backBtn: { marginBottom: 12 },
+    backBtnInteractive: { opacity: 0.75 },
     backBtnText: { color: colors.accent, fontSize: 15, fontWeight: "700" },
     title: { fontSize: 24, fontWeight: "800", color: colors.text },
     subtitle: { marginTop: 4, fontSize: 15, color: colors.mutetext, marginBottom: 16 },

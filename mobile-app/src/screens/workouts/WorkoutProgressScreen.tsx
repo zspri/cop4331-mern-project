@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   Platform,
 } from "react-native";
@@ -152,9 +152,9 @@ export function WorkoutProgressScreen({ workouts, onBack, token }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.content}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <Pressable onPress={onBack} style={({ hovered, pressed }: any) => [styles.backBtn, (hovered || pressed) && styles.backBtnInteractive]}>
           <Text style={styles.backBtnText}>← Back</Text>
-        </TouchableOpacity>
+        </Pressable>
 
         <Text style={styles.title}>Progress</Text>
         <Text style={styles.subtitle}>Your workout and exercise trends</Text>
@@ -186,6 +186,7 @@ function createStyles(colors: ThemeColors) {
     scrollContainer: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, flexGrow: 1 },
     content: { width: "100%", maxWidth: 900, alignSelf: "center", flex: 1 },
     backBtn: { marginBottom: 12 },
+    backBtnInteractive: { opacity: 0.75 },
     backBtnText: { color: colors.accent, fontSize: 15, fontWeight: "700" },
     title: { fontSize: 24, fontWeight: "800", color: colors.text },
     subtitle: { marginTop: 4, fontSize: 15, color: colors.mutetext, marginBottom: 16 },

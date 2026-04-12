@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
   useWindowDimensions
 } from "react-native";
@@ -21,7 +20,7 @@ type Props = {
 };
 
 export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const { width, height } = useWindowDimensions();
   const isWideLayout = width >= 900;
   const isMobileLandscape = Platform.OS !== "web" && width > height;
@@ -114,28 +113,30 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
               onPress={handleLogin}
               disabled={loading}
             >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Login</Text>
-              )}
+              {({ hovered, pressed }: any) => {
+                const isInteractive = hovered || pressed;
+                const useLightInvert = mode === "light" && isInteractive;
+                return loading ? (
+                  <ActivityIndicator color={useLightInvert ? colors.accent : "#fff"} />
+                ) : (
+                  <Text style={[styles.buttonText, useLightInvert && styles.buttonTextLightInteractive]}>Login</Text>
+                );
+              }}
             </Pressable>
 
-            <TouchableOpacity
-              style={styles.linkButton}
+            <Pressable
+              style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
               onPress={() => onNavigate("forgot")}
-              activeOpacity={0.7}
             >
               <Text style={styles.link}>Forgot password?</Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
-              style={styles.linkButton}
+            <Pressable
+              style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
               onPress={() => onNavigate("register")}
-              activeOpacity={0.7}
             >
               <Text style={styles.link}>Don't have an account? Register</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -240,8 +241,14 @@ function createStyles(
       color: "#fff",
       fontWeight: "700"
     },
+    buttonTextLightInteractive: {
+      color: colors.accent
+    },
     linkButton: {
       marginTop: 12
+    },
+    linkButtonInteractive: {
+      opacity: 0.75
     },
     link: {
       color: colors.accent,

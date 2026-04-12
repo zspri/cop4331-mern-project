@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   TextInput,
   ActivityIndicator,
@@ -42,9 +42,9 @@ export function MealFormScreen({
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.content}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <Pressable onPress={onBack} style={({ hovered, pressed }: any) => [styles.backBtn, (hovered || pressed) && styles.backBtnInteractive]}>
           <Text style={styles.backBtnText}>← Back</Text>
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.title}>{isEdit ? "Edit Meal" : "Log Meal"}</Text>
 
         <View style={styles.formCard}>
@@ -77,9 +77,9 @@ export function MealFormScreen({
           </View>
         </View>
 
-        <TouchableOpacity style={styles.submitBtn} onPress={onSubmit} disabled={loading}>
+        <Pressable style={({ hovered, pressed }: any) => [styles.submitBtn, hovered && styles.submitBtnHover, pressed && styles.submitBtnPressed, loading && styles.submitBtnDisabled]} onPress={onSubmit} disabled={loading}>
           {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitBtnText}>{isEdit ? "Save Changes" : "Log Meal"}</Text>}
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </ScrollView>
   );
@@ -90,6 +90,7 @@ function createStyles(colors: ThemeColors) {
     scrollContainer: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, flexGrow: 1 },
     content: { width: "100%", maxWidth: 900, alignSelf: "center", flex: 1 },
     backBtn: { marginBottom: 12 },
+    backBtnInteractive: { opacity: 0.75 },
     backBtnText: { color: colors.accent, fontSize: 15, fontWeight: "700" },
     title: { fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 16 },
     formCard: { backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, marginBottom: 16 },
@@ -98,6 +99,9 @@ function createStyles(colors: ThemeColors) {
     macroInputRow: { flexDirection: "row", gap: 10 },
     macroInputField: { flex: 1 },
     submitBtn: { backgroundColor: colors.accent, paddingVertical: 16, borderRadius: 16, alignItems: "center", shadowColor: colors.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 5 },
+    submitBtnHover: { opacity: 0.92 },
+    submitBtnPressed: { opacity: 0.82 },
+    submitBtnDisabled: { opacity: 0.7 },
     submitBtnText: { color: "#fff", fontWeight: "800", fontSize: 16 },
   });
 }

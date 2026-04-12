@@ -1,16 +1,17 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
+  Pressable,
   View,
   Platform,
   ActivityIndicator,
   useWindowDimensions,
 } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
-import type { ThemeColors } from "../theme/colors";
+import type { ThemeColors, ThemeMode } from "../theme/colors";
 
 const BASE =
   Platform.OS === "android" ? "http://10.0.2.2:5001/api" : "http://localhost:5001/api";
@@ -24,6 +25,8 @@ type Props = {
   currentUser?: any;
   token?: string | null;
   onLogout?: () => void;
+  mode: ThemeMode;
+  onToggleTheme: () => void;
 };
 
 function authHeader(token: string | null | undefined) {
@@ -44,7 +47,7 @@ const pbStyles = StyleSheet.create({
   fill: { height: "100%", borderRadius: 6 },
 });
 
-export function DashboardScreen({ currentUser, token, onLogout }: Props) {
+export function DashboardScreen({ currentUser, token, onLogout, mode, onToggleTheme }: Props) {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const sideGutter = isLandscape ? 96 : 16;
@@ -117,11 +120,18 @@ export function DashboardScreen({ currentUser, token, onLogout }: Props) {
 
   function StatBox({ label, value, sub }: { label: string; value: string; sub?: string }) {
     return (
-      <View style={styles.statBox}>
-        <Text style={styles.statValue}>{value}</Text>
-        <Text style={styles.statLabel}>{label}</Text>
-        {sub ? <Text style={styles.statSub}>{sub}</Text> : null}
-      </View>
+      <Pressable style={({ hovered, pressed }: any) => [styles.statBox, (hovered || pressed) && styles.infoTileInteractive]}>
+        {({ hovered, pressed }: any) => {
+          const invert = hovered || pressed;
+          return (
+            <>
+              <Text style={[styles.statValue, invert && styles.infoValueInteractive]}>{value}</Text>
+              <Text style={[styles.statLabel, invert && styles.infoTextInteractive]}>{label}</Text>
+              {sub ? <Text style={[styles.statSub, invert && styles.infoTextInteractive]}>{sub}</Text> : null}
+            </>
+          );
+        }}
+      </Pressable>
     );
   }
 
@@ -137,70 +147,124 @@ export function DashboardScreen({ currentUser, token, onLogout }: Props) {
             <Text style={styles.header}>Welcome back, {displayName}</Text>
             <Text style={styles.subheader}>Here's your daily summary</Text>
           </View>
-          {onLogout && (
-            <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
-              <Text style={styles.logoutText}>Logout</Text>
-            </TouchableOpacity>
-          )}
+          <View style={styles.headerActionsRow}>
+            <Pressable style={({ hovered, pressed }: any) => [styles.logoutButton, (hovered || pressed) && styles.logoutButtonInteractive]} onPress={onToggleTheme}>
+              <Ionicons
+                name={mode === "light" ? "sunny-outline" : "moon-outline"}
+                size={20}
+                color={colors.accent}
+                style={styles.modeIcon}
+              />
+            </Pressable>
+            {onLogout && (
+              <Pressable style={({ hovered, pressed }: any) => [styles.logoutButton, (hovered || pressed) && styles.logoutButtonInteractive]} onPress={onLogout}>
+                {({ hovered, pressed }: any) => (
+                  <Text style={[styles.logoutText, (hovered || pressed) && styles.logoutTextInteractive]}>Logout</Text>
+                )}
+              </Pressable>
+            )}
+          </View>
         </View>
 
         {loading ? (
           <ActivityIndicator color={colors.accent} style={{ marginTop: 32 }} />
         ) : (
           <>
-            <View style={styles.weekCard}>
-              <Text style={styles.weekCardTitle}>This Week's Progress</Text>
-              <View style={styles.weekRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.weekMetric}>
-                    {workoutsThisWeek} <Text style={styles.weekGoal}>/ {WORKOUT_GOAL} workouts</Text>
-                  </Text>
-                  <ProgressBar value={workoutsThisWeek} max={WORKOUT_GOAL} color={colors.accent} themeColors={colors} />
-                </View>
-                <View style={styles.weekBadge}>
-                  <Text style={styles.weekPct}>{weekWorkoutPct}%</Text>
-                </View>
-              </View>
-              <View style={[styles.weekRow, { marginTop: 12 }]}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.weekMetric}>
-                    {exercisesThisWeek} <Text style={styles.weekGoal}>/ {EXERCISE_GOAL} exercises</Text>
-                  </Text>
-                  <ProgressBar value={exercisesThisWeek} max={EXERCISE_GOAL} color={colors.warning} themeColors={colors} />
-                </View>
-              </View>
-            </View>
+            <Pressable style={({ hovered, pressed }: any) => [styles.weekCard, (hovered || pressed) && styles.infoTileInteractive]}>
+              {({ hovered, pressed }: any) => {
+                const invert = hovered || pressed;
+                return (
+                  <>
+                    <Text style={[styles.weekCardTitle, invert && styles.infoTextInteractive]}>This Week's Progress</Text>
+                    <View style={styles.weekRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.weekMetric, invert && styles.infoTextInteractive]}>
+                          {workoutsThisWeek} <Text style={[styles.weekGoal, invert && styles.infoTextInteractive]}>/ {WORKOUT_GOAL} workouts</Text>
+                        </Text>
+                        <ProgressBar value={workoutsThisWeek} max={WORKOUT_GOAL} color={colors.accent} themeColors={colors} />
+                      </View>
+                      <View style={[styles.weekBadge, invert && styles.infoBadgeInteractive]}>
+                        <Text style={[styles.weekPct, invert && styles.infoValueInteractive]}>{weekWorkoutPct}%</Text>
+                      </View>
+                    </View>
+                    <View style={[styles.weekRow, { marginTop: 12 }]}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.weekMetric, invert && styles.infoTextInteractive]}>
+                          {exercisesThisWeek} <Text style={[styles.weekGoal, invert && styles.infoTextInteractive]}>/ {EXERCISE_GOAL} exercises</Text>
+                        </Text>
+                        <ProgressBar value={exercisesThisWeek} max={EXERCISE_GOAL} color={colors.warning} themeColors={colors} />
+                      </View>
+                    </View>
+                  </>
+                );
+              }}
+            </Pressable>
 
             <SectionHeader title="Today's Nutrition" />
 
             {todaysMeals.length === 0 ? (
-              <View style={styles.emptyCard}>
-                <Text style={styles.emptyText}>No meals logged today</Text>
-                <Text style={styles.emptySub}>Head to the Nutrition tab to track your macros</Text>
-              </View>
+              <Pressable style={({ hovered, pressed }: any) => [styles.emptyCard, (hovered || pressed) && styles.infoTileInteractive]}>
+                {({ hovered, pressed }: any) => {
+                  const invert = hovered || pressed;
+                  return (
+                    <>
+                      <Text style={[styles.emptyText, invert && styles.infoTextInteractive]}>No meals logged today</Text>
+                      <Text style={[styles.emptySub, invert && styles.infoTextInteractive]}>Head to the Nutrition tab to track your macros</Text>
+                    </>
+                  );
+                }}
+              </Pressable>
             ) : (
               <>
                 <View style={styles.macroRow}>
-                  <View style={[styles.macroBig, { flex: 2 }]}>
-                    <Text style={styles.macroLabel}>Calories</Text>
-                    <Text style={styles.macroBigVal}>{calsToday}</Text>
-                    <Text style={styles.macroUnit}>/ {CALORIE_GOAL} kcal</Text>
-                    <ProgressBar value={calsToday} max={CALORIE_GOAL} color={colors.accent} themeColors={colors} />
-                  </View>
+                  <Pressable style={({ hovered, pressed }: any) => [styles.macroBig, { flex: 2 }, (hovered || pressed) && styles.infoTileInteractive]}>
+                    {({ hovered, pressed }: any) => {
+                      const invert = hovered || pressed;
+                      return (
+                        <>
+                          <Text style={[styles.macroLabel, invert && styles.infoTextInteractive]}>Calories</Text>
+                          <Text style={[styles.macroBigVal, invert && styles.infoValueInteractive]}>{calsToday}</Text>
+                          <Text style={[styles.macroUnit, invert && styles.infoTextInteractive]}>/ {CALORIE_GOAL} kcal</Text>
+                          <ProgressBar value={calsToday} max={CALORIE_GOAL} color={invert ? "#fff" : colors.accent} themeColors={colors} />
+                        </>
+                      );
+                    }}
+                  </Pressable>
                   <View style={{ flex: 1, gap: 8 }}>
-                    <View style={styles.macroSmall}>
-                      <Text style={styles.macroLabel}>Protein</Text>
-                      <Text style={styles.macroSmallVal}>{proteinToday}g</Text>
-                      <ProgressBar value={proteinToday} max={PROTEIN_GOAL} color="#8B5CF6" themeColors={colors} />
-                    </View>
-                    <View style={styles.macroSmall}>
-                      <Text style={styles.macroLabel}>Carbs</Text>
-                      <Text style={styles.macroSmallVal}>{carbsToday}g</Text>
-                    </View>
-                    <View style={styles.macroSmall}>
-                      <Text style={styles.macroLabel}>Fats</Text>
-                      <Text style={styles.macroSmallVal}>{fatsToday}g</Text>
-                    </View>
+                    <Pressable style={({ hovered, pressed }: any) => [styles.macroSmall, (hovered || pressed) && styles.infoTileInteractive]}>
+                      {({ hovered, pressed }: any) => {
+                        const invert = hovered || pressed;
+                        return (
+                          <>
+                            <Text style={[styles.macroLabel, invert && styles.infoTextInteractive]}>Protein</Text>
+                            <Text style={[styles.macroSmallVal, invert && styles.infoValueInteractive]}>{proteinToday}g</Text>
+                            <ProgressBar value={proteinToday} max={PROTEIN_GOAL} color={invert ? "#fff" : "#8B5CF6"} themeColors={colors} />
+                          </>
+                        );
+                      }}
+                    </Pressable>
+                    <Pressable style={({ hovered, pressed }: any) => [styles.macroSmall, (hovered || pressed) && styles.infoTileInteractive]}>
+                      {({ hovered, pressed }: any) => {
+                        const invert = hovered || pressed;
+                        return (
+                          <>
+                            <Text style={[styles.macroLabel, invert && styles.infoTextInteractive]}>Carbs</Text>
+                            <Text style={[styles.macroSmallVal, invert && styles.infoValueInteractive]}>{carbsToday}g</Text>
+                          </>
+                        );
+                      }}
+                    </Pressable>
+                    <Pressable style={({ hovered, pressed }: any) => [styles.macroSmall, (hovered || pressed) && styles.infoTileInteractive]}>
+                      {({ hovered, pressed }: any) => {
+                        const invert = hovered || pressed;
+                        return (
+                          <>
+                            <Text style={[styles.macroLabel, invert && styles.infoTextInteractive]}>Fats</Text>
+                            <Text style={[styles.macroSmallVal, invert && styles.infoValueInteractive]}>{fatsToday}g</Text>
+                          </>
+                        );
+                      }}
+                    </Pressable>
                   </View>
                 </View>
                 <Text style={styles.mealCount}>{todaysMeals.length} meal{todaysMeals.length !== 1 ? "s" : ""} logged today</Text>
@@ -218,26 +282,33 @@ export function DashboardScreen({ currentUser, token, onLogout }: Props) {
             {latestWorkout && (
               <>
                 <SectionHeader title="Last Workout" />
-                <View style={styles.lastCard}>
-                  <Text style={styles.lastName}>{latestWorkout.name}</Text>
-                  <Text style={styles.lastMeta}>
-                    {latestWorkout.category} · {latestWorkout.exercises?.length ?? 0} exercise{(latestWorkout.exercises?.length ?? 0) !== 1 ? "s" : ""} · {new Date(latestWorkout.createdAt).toLocaleDateString()}
-                  </Text>
-                  {(latestWorkout.exercises?.length ?? 0) > 0 && (
-                    <View style={styles.exerciseTags}>
-                      {latestWorkout.exercises.slice(0, 3).map((ex: any, i: number) => (
-                        <View key={i} style={styles.exerciseTag}>
-                          <Text style={styles.exerciseTagText}>{ex.exerciseName}</Text>
-                        </View>
-                      ))}
-                      {latestWorkout.exercises.length > 3 && (
-                        <View style={styles.exerciseTag}>
-                          <Text style={styles.exerciseTagText}>+{latestWorkout.exercises.length - 3} more</Text>
-                        </View>
-                      )}
-                    </View>
-                  )}
-                </View>
+                <Pressable style={({ hovered, pressed }: any) => [styles.lastCard, (hovered || pressed) && styles.infoTileInteractive]}>
+                  {({ hovered, pressed }: any) => {
+                    const invert = hovered || pressed;
+                    return (
+                      <>
+                        <Text style={[styles.lastName, invert && styles.infoTextInteractive]}>{latestWorkout.name}</Text>
+                        <Text style={[styles.lastMeta, invert && styles.infoTextInteractive]}>
+                          {latestWorkout.category} · {latestWorkout.exercises?.length ?? 0} exercise{(latestWorkout.exercises?.length ?? 0) !== 1 ? "s" : ""} · {new Date(latestWorkout.createdAt).toLocaleDateString()}
+                        </Text>
+                        {(latestWorkout.exercises?.length ?? 0) > 0 && (
+                          <View style={styles.exerciseTags}>
+                            {latestWorkout.exercises.slice(0, 3).map((ex: any, i: number) => (
+                              <View key={i} style={[styles.exerciseTag, invert && styles.infoBadgeInteractive]}>
+                                <Text style={[styles.exerciseTagText, invert && styles.infoValueInteractive]}>{ex.exerciseName}</Text>
+                              </View>
+                            ))}
+                            {latestWorkout.exercises.length > 3 && (
+                              <View style={[styles.exerciseTag, invert && styles.infoBadgeInteractive]}>
+                                <Text style={[styles.exerciseTagText, invert && styles.infoValueInteractive]}>+{latestWorkout.exercises.length - 3} more</Text>
+                              </View>
+                            )}
+                          </View>
+                        )}
+                      </>
+                    );
+                  }}
+                </Pressable>
               </>
             )}
 
@@ -247,10 +318,17 @@ export function DashboardScreen({ currentUser, token, onLogout }: Props) {
               <StatBox label="Avg Calories" value={`${avgCals}`} sub="per meal" />
             </View>
 
-            <View style={styles.coachCard}>
-              <Text style={styles.coachTitle}>Coach Tip</Text>
-              <Text style={styles.coachText}>{getCoachTip()}</Text>
-            </View>
+            <Pressable style={({ hovered, pressed }: any) => [styles.coachCard, (hovered || pressed) && styles.infoTileInteractive]}>
+              {({ hovered, pressed }: any) => {
+                const invert = hovered || pressed;
+                return (
+                  <>
+                    <Text style={[styles.coachTitle, invert && styles.infoTextInteractive]}>Coach Tip</Text>
+                    <Text style={[styles.coachText, invert && styles.infoTextInteractive]}>{getCoachTip()}</Text>
+                  </>
+                );
+              }}
+            </Pressable>
           </>
         )}
       </View>
@@ -263,10 +341,18 @@ function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: 
     container: { paddingHorizontal: sideGutter, paddingTop: 8, paddingBottom: 32, backgroundColor: colors.bg },
     content: { width: "100%", maxWidth: contentMaxWidth, alignSelf: "center", gap: 12 },
     headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 },
+    headerActionsRow: { flexDirection: "row", alignItems: "center", gap: 8 },
     header: { fontSize: 24, fontWeight: "800", color: colors.text },
     subheader: { marginTop: 4, fontSize: 15, color: colors.mutetext },
     logoutButton: { backgroundColor: colors.accentSoft, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: colors.accent + "40" },
+    logoutButtonInteractive: { backgroundColor: colors.tileHover, borderColor: colors.accent + "55" },
     logoutText: { color: colors.accent, fontWeight: "700", fontSize: 14 },
+    logoutTextInteractive: { color: colors.accent },
+    modeIcon: { lineHeight: 20 },
+    infoTileInteractive: { backgroundColor: colors.tileHover, borderColor: colors.accent + "55" },
+    infoTextInteractive: { color: colors.text },
+    infoValueInteractive: { color: colors.accent },
+    infoBadgeInteractive: { backgroundColor: colors.accentSoft, borderColor: colors.accent + "40", borderWidth: 1 },
     sectionLabel: { fontSize: 12, fontWeight: "700", color: colors.mutetext, textTransform: "uppercase", letterSpacing: 0.8, marginTop: 8 },
     weekCard: { backgroundColor: colors.card, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: colors.border },
     weekCardTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 14 },

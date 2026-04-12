@@ -2,10 +2,10 @@ import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View
 } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
@@ -17,7 +17,7 @@ type Props = {
 };
 
 export function ResetPasswordScreen({ onNavigate }: Props) {
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [pin, setPin] = useState("");
@@ -98,22 +98,32 @@ export function ResetPasswordScreen({ onNavigate }: Props) {
             onChangeText={setConfirmPassword}
           />
 
-          <TouchableOpacity
-            style={styles.button}
-            activeOpacity={0.8}
+          <Pressable
+            style={({ hovered, pressed }: any) => [
+              styles.button,
+              (hovered || pressed) && styles.buttonInteractive,
+              loading && styles.buttonDisabled
+            ]}
             onPress={handleReset}
             disabled={loading}
           >
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Reset Password</Text>}
-          </TouchableOpacity>
+            {({ hovered, pressed }: any) => {
+              const isInteractive = hovered || pressed;
+              const useLightInvert = mode === "light" && isInteractive;
+              return loading ? (
+                <ActivityIndicator color={useLightInvert ? colors.accent : "#fff"} />
+              ) : (
+                <Text style={[styles.buttonText, useLightInvert && styles.buttonTextLightInteractive]}>Reset Password</Text>
+              );
+            }}
+          </Pressable>
 
-          <TouchableOpacity
-            style={styles.linkButton}
+          <Pressable
+            style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
             onPress={() => onNavigate("login")}
-            activeOpacity={0.7}
           >
             <Text style={styles.link}>Back to login</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </View>
@@ -180,12 +190,26 @@ function createStyles(colors: ThemeColors) {
       alignItems: "center",
       marginTop: 12
     },
+    buttonInteractive: {
+      backgroundColor: colors.accentSoft,
+      borderWidth: 1,
+      borderColor: colors.accent
+    },
+    buttonDisabled: {
+      opacity: 0.7
+    },
     buttonText: {
       color: "#fff",
       fontWeight: "700"
     },
+    buttonTextLightInteractive: {
+      color: colors.accent
+    },
     linkButton: {
       marginTop: 12
+    },
+    linkButtonInteractive: {
+      opacity: 0.75
     },
     link: {
       color: colors.accent,

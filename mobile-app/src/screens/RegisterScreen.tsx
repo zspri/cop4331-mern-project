@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
   useWindowDimensions
 } from "react-native";
@@ -20,7 +19,7 @@ type Props = {
 };
 
 export function RegisterScreen({ onNavigate }: Props) {
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const { width, height } = useWindowDimensions();
   const isWideLayout = width >= 900;
   const isMobileLandscape = Platform.OS !== "web" && width > height;
@@ -137,20 +136,23 @@ export function RegisterScreen({ onNavigate }: Props) {
               onPress={handleRegister}
               disabled={loading}
             >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Create Account</Text>
-              )}
+              {({ hovered, pressed }: any) => {
+                const isInteractive = hovered || pressed;
+                const useLightInvert = mode === "light" && isInteractive;
+                return loading ? (
+                  <ActivityIndicator color={useLightInvert ? colors.accent : "#fff"} />
+                ) : (
+                  <Text style={[styles.buttonText, useLightInvert && styles.buttonTextLightInteractive]}>Create Account</Text>
+                );
+              }}
             </Pressable>
 
-            <TouchableOpacity
-              style={styles.linkButton}
+            <Pressable
+              style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
               onPress={() => onNavigate("login")}
-              activeOpacity={0.7}
             >
               <Text style={styles.link}>Already have an account? Login</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -255,8 +257,14 @@ function createStyles(
       color: "#fff",
       fontWeight: "700"
     },
+    buttonTextLightInteractive: {
+      color: colors.accent
+    },
     linkButton: {
       marginTop: 12
+    },
+    linkButtonInteractive: {
+      opacity: 0.75
     },
     link: {
       color: colors.accent,

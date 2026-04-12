@@ -1,15 +1,17 @@
 import React, { useMemo } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   FlatList,
   ActivityIndicator,
+  Platform,
   useWindowDimensions,
 } from "react-native";
 import { useTheme } from "../../theme/ThemeContext";
-import type { ThemeColors } from "../../theme/colors";
+import type { ThemeColors, ThemeMode } from "../../theme/colors";
 import { Meal, PROTEIN_GOAL } from "./nutritionTypes";
 
 type Props = {
@@ -19,6 +21,8 @@ type Props = {
   onView: (m: Meal) => void;
   onEdit: (m: Meal) => void;
   onProgress: () => void;
+  mode: ThemeMode;
+  onToggleTheme: () => void;
 };
 
 function MacroPill({ label, value, unit, styles }: { label: string; value: string; unit: string; styles: any }) {
@@ -30,14 +34,16 @@ function MacroPill({ label, value, unit, styles }: { label: string; value: strin
   );
 }
 
-export function MealListScreen({ meals, loading, onAdd, onView, onEdit, onProgress }: Props) {
+export function MealListScreen({ meals, loading, onAdd, onView, onEdit, onProgress, mode, onToggleTheme }: Props) {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+  const isMobileLandscape = Platform.OS !== "web" && isLandscape;
   const sideGutter = isLandscape ? 96 : 16;
   const contentMaxWidth = isLandscape ? Math.max(1200, width - sideGutter * 2) : 900;
+  const fabBottom = isMobileLandscape ? 4 : 16;
 
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors, sideGutter, contentMaxWidth), [colors, sideGutter, contentMaxWidth]);
+  const styles = useMemo(() => createStyles(colors, sideGutter, contentMaxWidth, fabBottom), [colors, sideGutter, contentMaxWidth, fabBottom]);
 
   const today = new Date().toISOString().split("T")[0];
   const todaysMeals = meals.filter((m) => m.date === today);
@@ -52,9 +58,21 @@ export function MealListScreen({ meals, loading, onAdd, onView, onEdit, onProgre
             <Text style={styles.title}>Nutrition</Text>
             <Text style={styles.subtitle}>Meals and macros</Text>
           </View>
-          <TouchableOpacity style={styles.graphBtn} onPress={onProgress}>
-            <Text style={styles.graphBtnText}>Progress</Text>
-          </TouchableOpacity>
+          <View style={styles.headerActionsRow}>
+            <Pressable style={({ hovered, pressed }: any) => [styles.graphBtn, hovered && styles.graphBtnHover, pressed && styles.graphBtnPressed]} onPress={onToggleTheme}>
+              <Ionicons
+                name={mode === "light" ? "sunny-outline" : "moon-outline"}
+                size={18}
+                color={colors.accent}
+                style={styles.modeIcon}
+              />
+            </Pressable>
+            <Pressable style={({ hovered, pressed }: any) => [styles.graphBtn, hovered && styles.graphBtnHover, pressed && styles.graphBtnPressed]} onPress={onProgress}>
+              {({ hovered, pressed }: any) => (
+                <Text style={[styles.graphBtnText, (hovered || pressed) && styles.graphBtnTextInteractive]}>Progress</Text>
+              )}
+            </Pressable>
+          </View>
         </View>
 
         {todaysMeals.length > 0 && (
@@ -80,42 +98,56 @@ export function MealListScreen({ meals, loading, onAdd, onView, onEdit, onProgre
             keyExtractor={(item) => item._id}
             contentContainerStyle={styles.list}
             renderItem={({ item }) => (
-              <TouchableOpacity style={styles.itemCard} onPress={() => onView(item)}>
-                <View style={styles.itemCardRow}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.itemTitle}>{item.name}</Text>
-                    <Text style={styles.meta}>{item.calories} kcal</Text>
-                    <Text style={styles.metaSecondary}>
-                      P {item.proteinG}g · C {item.carbsG}g · F {item.fatsG}g
-                    </Text>
-                    <Text style={styles.metaDate}>{item.date}</Text>
-                  </View>
-                  <TouchableOpacity style={styles.editBtn} onPress={() => onEdit(item)}>
-                    <Text style={styles.editBtnText}>Edit</Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
+              <Pressable style={({ hovered, pressed }: any) => [styles.itemCard, hovered && styles.itemCardHover, pressed && styles.itemCardPressed]} onPress={() => onView(item)}>
+                {({ hovered, pressed }: any) => {
+                  const invert = hovered || pressed;
+                  return (
+                    <View style={styles.itemCardRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.itemTitle}>{item.name}</Text>
+                        <Text style={styles.meta}>{item.calories} kcal</Text>
+                        <Text style={styles.metaSecondary}>
+                          P {item.proteinG}g · C {item.carbsG}g · F {item.fatsG}g
+                        </Text>
+                        <Text style={styles.metaDate}>{item.date}</Text>
+                      </View>
+                      <Pressable style={({ hovered, pressed }: any) => [styles.editBtn, hovered && styles.editBtnHover, pressed && styles.editBtnPressed]} onPress={() => onEdit(item)}>
+                        {({ hovered, pressed }: any) => (
+                          <Text style={[styles.editBtnText, (hovered || pressed) && styles.editBtnTextInteractive]}>Edit</Text>
+                        )}
+                      </Pressable>
+                    </View>
+                  );
+                }}
+              </Pressable>
             )}
           />
         )}
 
-        <TouchableOpacity style={styles.fab} onPress={onAdd}>
-          <Text style={styles.fabText}>+ Log Meal</Text>
-        </TouchableOpacity>
+        <Pressable style={({ hovered, pressed }: any) => [styles.fab, hovered && styles.fabHover, pressed && styles.fabPressed, (hovered || pressed) && styles.fabInverted]} onPress={onAdd}>
+          {({ hovered, pressed }: any) => (
+            <Text style={[styles.fabText, (hovered || pressed) && styles.fabTextInverted]}>+ Log Meal</Text>
+          )}
+        </Pressable>
       </View>
     </View>
   );
 }
 
-function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: number) {
+function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: number, fabBottom: number) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: sideGutter, paddingTop: 8, paddingBottom: 24 },
     content: { width: "100%", maxWidth: contentMaxWidth, alignSelf: "center", flex: 1 },
     headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 },
+    headerActionsRow: { flexDirection: "row", alignItems: "center", gap: 8 },
     title: { fontSize: 24, fontWeight: "800", color: colors.text },
     subtitle: { marginTop: 4, fontSize: 15, color: colors.mutetext },
     graphBtn: { backgroundColor: colors.accentSoft, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: colors.accent + "40" },
+    graphBtnHover: { backgroundColor: colors.tileHover, borderColor: colors.accent + "55" },
+    graphBtnPressed: { backgroundColor: colors.tilePress, borderColor: colors.accent + "70" },
     graphBtnText: { color: colors.accent, fontWeight: "700", fontSize: 14 },
+    graphBtnTextInteractive: { color: colors.accent },
+    modeIcon: { lineHeight: 18 },
     todaySummary: { backgroundColor: colors.card, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: colors.border, marginBottom: 14 },
     todayLabel: { fontSize: 12, fontWeight: "700", color: colors.mutetext, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 },
     macroRow: { flexDirection: "row", gap: 10 },
@@ -128,14 +160,23 @@ function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: 
     emptySubtext: { fontSize: 14, color: colors.mutetext, textAlign: "center" },
     list: { gap: 14, paddingBottom: 80 },
     itemCard: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: 18, paddingVertical: 16, paddingHorizontal: 18, borderLeftWidth: 4, borderLeftColor: colors.accent },
+    itemCardHover: { backgroundColor: colors.tileHover, borderColor: colors.accent + "44" },
+    itemCardPressed: { backgroundColor: colors.tilePress, borderColor: colors.accent + "66" },
     itemCardRow: { flexDirection: "row", alignItems: "center" },
     itemTitle: { fontSize: 18, color: colors.text, fontWeight: "800" },
     meta: { fontSize: 13, color: colors.mutetext, marginTop: 4 },
     metaSecondary: { fontSize: 12, color: colors.mutetext, marginTop: 2 },
     metaDate: { fontSize: 12, color: colors.mutetext, marginTop: 2 },
     editBtn: { backgroundColor: colors.accentSoft, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: colors.accent + "40" },
+    editBtnHover: { backgroundColor: colors.tileHover, borderColor: colors.accent + "55" },
+    editBtnPressed: { backgroundColor: colors.tilePress, borderColor: colors.accent + "70" },
     editBtnText: { color: colors.accent, fontWeight: "700", fontSize: 13 },
-    fab: { position: "absolute", bottom: 16, right: 0, left: 0, backgroundColor: colors.accent, paddingVertical: 16, borderRadius: 16, alignItems: "center", shadowColor: colors.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
+    editBtnTextInteractive: { color: colors.accent },
+    fab: { position: "absolute", bottom: fabBottom, right: 0, left: 0, backgroundColor: colors.accent, paddingVertical: 16, borderRadius: 16, alignItems: "center", shadowColor: colors.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
+    fabHover: { opacity: 0.96 },
+    fabPressed: { opacity: 0.92 },
+    fabInverted: { backgroundColor: colors.accentSoft, borderWidth: 1, borderColor: colors.accent },
     fabText: { color: "#fff", fontWeight: "800", fontSize: 16 },
+    fabTextInverted: { color: colors.accent },
   });
 }
