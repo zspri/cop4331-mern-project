@@ -9,7 +9,7 @@ export function NutritionScreen() {
   const { width, height } = useWindowDimensions();
 
   const isLandscape = width > height;
-  const isWideLayout = isLandscape && width >= 900;
+  const isWideLayout = isLandscape && width >= 700;
 
   const styles = useMemo(
     () =>

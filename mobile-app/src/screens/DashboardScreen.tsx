@@ -17,7 +17,7 @@ export function DashboardScreen({ onLogout }: Props) {
   const { width, height } = useWindowDimensions();
 
   const isLandscape = width > height;
-  const isWideLayout = isLandscape && width >= 900;
+  const isWideLayout = isLandscape && width >= 700;
 
   const horizontalPadding = isWideLayout ? 26 : isLandscape ? 22 : 16;
   const contentMaxWidth = isWideLayout ? 1360 : isLandscape ? 980 : 760;

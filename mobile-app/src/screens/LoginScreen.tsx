@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Pressable, View, Text, StyleSheet, TextInput, TouchableOpacity, useWindowDimensions } from "react-native";
+import { Platform, Pressable, View, Text, StyleSheet, TextInput, TouchableOpacity, useWindowDimensions } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import type { ThemeColors } from "../theme/colors";
 
@@ -10,10 +10,15 @@ type Props = {
 
 export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
   const { colors } = useTheme();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const isWideLayout = width >= 900;
+  const isMobileLandscape = Platform.OS !== "web" && width > height;
+  const isMobilePortrait = Platform.OS !== "web" && height >= width;
 
-  const styles = useMemo(() => createStyles(colors, isWideLayout), [colors, isWideLayout]);
+  const styles = useMemo(
+    () => createStyles(colors, isWideLayout, isMobileLandscape, isMobilePortrait),
+    [colors, isWideLayout, isMobileLandscape, isMobilePortrait]
+  );
 
   return (
     <View style={styles.container}>
@@ -83,7 +88,12 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
   );
 }
 
-function createStyles(colors: ThemeColors, isWideLayout: boolean) {
+function createStyles(
+  colors: ThemeColors,
+  isWideLayout: boolean,
+  isMobileLandscape: boolean,
+  isMobilePortrait: boolean
+) {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -113,23 +123,23 @@ function createStyles(colors: ThemeColors, isWideLayout: boolean) {
       justifyContent: "center"
     },
     brand: {
-      fontSize: 28,
+      fontSize: isMobilePortrait ? 50 : 28,
       fontWeight: "800",
       color: colors.accent
     },
     heroBrand: {
-      fontSize: 84,
+      fontSize: isMobileLandscape ? 55 : 84,
       fontWeight: "900",
       color: colors.accent,
       letterSpacing: -0.7
     },
     heroTagline: {
       marginTop: 8,
-      fontSize: 42,
+      fontSize: isMobileLandscape ? 27 : 42,
       color: colors.mutetext
     },
     tagline: {
-      fontSize: 14,
+      fontSize: isMobilePortrait ? 25 : 14,
       color: colors.mutetext,
       marginBottom: 30
     },

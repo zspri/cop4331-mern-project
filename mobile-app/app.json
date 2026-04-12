@@ -3,7 +3,7 @@
     "name": "MuscleMeter+",
     "slug": "musclemeter-plus",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "userInterfaceStyle": "light",
     "android": {
       "package": "com.anonymous.musclemeterplus"
