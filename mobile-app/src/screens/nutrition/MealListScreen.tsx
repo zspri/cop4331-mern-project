@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  Platform,
+  useWindowDimensions,
 } from "react-native";
 import { useTheme } from "../../theme/ThemeContext";
 import type { ThemeColors } from "../../theme/colors";
@@ -30,8 +32,13 @@ function MacroPill({ label, value, unit, styles }: { label: string; value: strin
 }
 
 export function MealListScreen({ meals, loading, onAdd, onView, onEdit, onProgress }: Props) {
+  const { width, height } = useWindowDimensions();
+  const isWebLandscape = Platform.OS === "web" && width > height;
+  const sideGutter = isWebLandscape ? 96 : 16;
+  const contentMaxWidth = isWebLandscape ? Math.max(1200, width - sideGutter * 2) : 900;
+
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useMemo(() => createStyles(colors, sideGutter, contentMaxWidth), [colors, sideGutter, contentMaxWidth]);
 
   const today = new Date().toISOString().split("T")[0];
   const todaysMeals = meals.filter((m) => m.date === today);
@@ -101,10 +108,10 @@ export function MealListScreen({ meals, loading, onAdd, onView, onEdit, onProgre
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: number) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
-    content: { width: "100%", maxWidth: 900, alignSelf: "center", flex: 1 },
+    container: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: sideGutter, paddingTop: 8, paddingBottom: 24 },
+    content: { width: "100%", maxWidth: contentMaxWidth, alignSelf: "center", flex: 1 },
     headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 },
     title: { fontSize: 24, fontWeight: "800", color: colors.text },
     subtitle: { marginTop: 4, fontSize: 15, color: colors.mutetext },

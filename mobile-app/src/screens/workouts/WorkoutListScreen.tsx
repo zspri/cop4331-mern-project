@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  Platform,
+  useWindowDimensions,
 } from "react-native";
 import { Workout, WorkoutSubView } from "./workoutTypes";
 import { useTheme } from "../../theme/ThemeContext";
@@ -21,8 +23,13 @@ type Props = {
 };
 
 export function WorkoutListScreen({ workouts, loading, onAdd, onView, onEdit, onProgress }: Props) {
+  const { width, height } = useWindowDimensions();
+  const isWebLandscape = Platform.OS === "web" && width > height;
+  const sideGutter = isWebLandscape ? 96 : 16;
+  const contentMaxWidth = isWebLandscape ? Math.max(1200, width - sideGutter * 2) : 900;
+
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useMemo(() => createStyles(colors, sideGutter, contentMaxWidth), [colors, sideGutter, contentMaxWidth]);
 
   return (
     <View style={styles.container}>
@@ -79,10 +86,10 @@ export function WorkoutListScreen({ workouts, loading, onAdd, onView, onEdit, on
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: number) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
-    content: { width: "100%", maxWidth: 900, alignSelf: "center", flex: 1 },
+    container: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: sideGutter, paddingTop: 8, paddingBottom: 24 },
+    content: { width: "100%", maxWidth: contentMaxWidth, alignSelf: "center", flex: 1 },
     headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 },
     title: { fontSize: 24, fontWeight: "800", color: colors.text },
     subtitle: { marginTop: 4, fontSize: 15, color: colors.mutetext },

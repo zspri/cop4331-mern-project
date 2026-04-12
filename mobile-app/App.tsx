@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { Platform, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Platform, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
@@ -24,7 +24,11 @@ export default function App() {
 
 function AppContent() {
   const { colors, mode, toggleTheme } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { width, height } = useWindowDimensions();
+  const isWebLandscape = Platform.OS === "web" && width > height;
+  const sideGutter = isWebLandscape ? 96 : 16;
+  const contentMaxWidth = isWebLandscape ? Math.max(1200, width - sideGutter * 2) : 900;
+  const styles = useMemo(() => createStyles(colors, sideGutter, contentMaxWidth), [colors, sideGutter, contentMaxWidth]);
 
   useEffect(() => {
     const doc = (globalThis as any).document;
@@ -88,7 +92,7 @@ function AppContent() {
   const screen = useMemo(() => {
     if (tab === "workouts") return <WorkoutsScreen currentUser={currentUser} token={token} />;
     if (tab === "nutrition") return <NutritionScreen currentUser={currentUser} token={token} />;
-    return <DashboardScreen currentUser={currentUser} token={token} />;
+    return <DashboardScreen currentUser={currentUser} token={token} onLogout={handleLogout} />;
   }, [tab, currentUser, token]);
 
   const authFlowScreen = useMemo(() => {
@@ -137,11 +141,7 @@ function AppContent() {
 
                 {currentUser && (
                   <View style={styles.profileBox}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 }}>
-                      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-                        <Text style={styles.logoutText}>Logout</Text>
-                      </TouchableOpacity>
-                    </View>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 }} />
                   </View>
                 )}
               </View>
@@ -206,7 +206,7 @@ function AppContent() {
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: number) {
   return StyleSheet.create({
     safeArea: {
       flex: 1,
@@ -222,12 +222,10 @@ function createStyles(colors: ThemeColors) {
     },
     headerContent: {
       width: "100%",
-      maxWidth: 900,
-      alignSelf: "center",
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      paddingHorizontal: 16
+      paddingHorizontal: sideGutter
     },
     profileBox: {
       alignItems: "flex-end",
@@ -241,12 +239,12 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
-      paddingHorizontal: 10,
-      paddingVertical: 5,
+      paddingHorizontal: 15,
+      paddingVertical: 8,
       borderRadius: 8,
     },
     logoutText: {
-      fontSize: 12,
+      fontSize: 18,
       color: colors.accent,
       fontWeight: "600"
     },
@@ -275,12 +273,10 @@ function createStyles(colors: ThemeColors) {
     },
     navContent: {
       width: "100%",
-      maxWidth: 900,
-      alignSelf: "center",
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      paddingHorizontal: 8
+      paddingHorizontal: sideGutter
     },
     tabBtn: {
       flex: 1,

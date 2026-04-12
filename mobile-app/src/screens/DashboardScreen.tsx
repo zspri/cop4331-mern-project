@@ -3,9 +3,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
   Platform,
   ActivityIndicator,
+  useWindowDimensions,
 } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import type { ThemeColors } from "../theme/colors";
@@ -21,6 +23,7 @@ const EXERCISE_GOAL = 15;
 type Props = {
   currentUser?: any;
   token?: string | null;
+  onLogout?: () => void;
 };
 
 function authHeader(token: string | null | undefined) {
@@ -41,9 +44,14 @@ const pbStyles = StyleSheet.create({
   fill: { height: "100%", borderRadius: 6 },
 });
 
-export function DashboardScreen({ currentUser, token }: Props) {
+export function DashboardScreen({ currentUser, token, onLogout }: Props) {
+  const { width, height } = useWindowDimensions();
+  const isWebLandscape = Platform.OS === "web" && width > height;
+  const sideGutter = isWebLandscape ? 96 : 16;
+  const contentMaxWidth = isWebLandscape ? Math.max(1200, width - sideGutter * 2) : 900;
+
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useMemo(() => createStyles(colors, sideGutter, contentMaxWidth), [colors, sideGutter, contentMaxWidth]);
 
   const [workouts, setWorkouts] = useState<any[]>([]);
   const [meals, setMeals] = useState<any[]>([]);
@@ -124,8 +132,17 @@ export function DashboardScreen({ currentUser, token }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.header}>Welcome back, {displayName}</Text>
-        <Text style={styles.subheader}>Here's your daily summary</Text>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.header}>Welcome back, {displayName}</Text>
+            <Text style={styles.subheader}>Here's your daily summary</Text>
+          </View>
+          {onLogout && (
+            <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
         {loading ? (
           <ActivityIndicator color={colors.accent} style={{ marginTop: 32 }} />
@@ -241,12 +258,15 @@ export function DashboardScreen({ currentUser, token }: Props) {
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: number) {
   return StyleSheet.create({
-    container: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, backgroundColor: colors.bg },
-    content: { width: "100%", maxWidth: 900, alignSelf: "center", gap: 12 },
-    header: { marginTop: 8, fontSize: 24, fontWeight: "800", color: colors.text },
-    subheader: { marginTop: -4, fontSize: 15, color: colors.mutetext },
+    container: { paddingHorizontal: sideGutter, paddingTop: 8, paddingBottom: 32, backgroundColor: colors.bg },
+    content: { width: "100%", maxWidth: contentMaxWidth, alignSelf: "center", gap: 12 },
+    headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 },
+    header: { fontSize: 24, fontWeight: "800", color: colors.text },
+    subheader: { marginTop: 4, fontSize: 15, color: colors.mutetext },
+    logoutButton: { backgroundColor: colors.accentSoft, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: colors.accent + "40" },
+    logoutText: { color: colors.accent, fontWeight: "700", fontSize: 14 },
     sectionLabel: { fontSize: 12, fontWeight: "700", color: colors.mutetext, textTransform: "uppercase", letterSpacing: 0.8, marginTop: 8 },
     weekCard: { backgroundColor: colors.card, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: colors.border },
     weekCardTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 14 },
