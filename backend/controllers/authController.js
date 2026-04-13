@@ -2,6 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const sendEmail = require('../utils/sendEmail');
 
 // Generate JWT
 const generateToken = (user) => {
@@ -15,30 +16,32 @@ const generateToken = (user) => {
     );
 };
 
-// @desc    Register user
-// @route   POST /api/auth/register
-// @access  Public
+const getBackendBaseUrl = () => {
+    return process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`;
+};
+
+// @desc Register user
+// @route POST /api/auth/register
+// @access Public
 const registerUser = async (req, res) => {
     try {
         const { firstName, lastName, email, password } = req.body;
 
-        // Basic validation
         if (!firstName || !lastName || !email || !password) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
-        // Check if user already exists
         const existingUser = await User.findOne({ email });
+
         if (existingUser) {
             return res.status(400).json({ error: 'User already exists' });
         }
 
-        // Hash password before saving
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Optional verification token
         const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
         const user = await User.create({
             firstName,
@@ -46,14 +49,28 @@ const registerUser = async (req, res) => {
             email,
             password: hashedPassword,
             verificationToken,
+            verificationTokenExpires,
             isVerified: false,
         });
 
-        const token = generateToken(user);
+        const verifyUrl = `${getBackendBaseUrl()}/api/auth/verify-email/${verificationToken}`;
+
+        const html = `
+            <h2>Verify Your Email</h2>
+            <p>Hello ${user.firstName},</p>
+            <p>Thank you for registering. Please verify your email by clicking the link below:</p>
+            <p>
+                <a href="${verifyUrl}" target="_blank">
+                    Verify Email
+                </a>
+            </p>
+            <p>This link will expire in 24 hours.</p>
+        `;
+
+        await sendEmail(user.email, 'Verify your email address', html);
 
         res.status(201).json({
-            message: 'User registered successfully',
-            token,
+            message: 'User registered successfully. Please check your email to verify your account before logging in.',
             user: {
                 id: user._id,
                 firstName: user.firstName,
@@ -68,9 +85,9 @@ const registerUser = async (req, res) => {
     }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
+// @desc Login user
+// @route POST /api/auth/login
+// @access Public
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -80,14 +97,21 @@ const loginUser = async (req, res) => {
         }
 
         const user = await User.findOne({ email });
+
         if (!user) {
             return res.status(400).json({ error: 'Invalid credentials' });
         }
 
-        // Compare entered password with hashed password in DB
         const isMatch = await bcrypt.compare(password, user.password);
+
         if (!isMatch) {
             return res.status(400).json({ error: 'Invalid credentials' });
+        }
+
+        if (!user.isVerified) {
+            return res.status(403).json({
+                error: 'Please verify your email before logging in',
+            });
         }
 
         const token = generateToken(user);
@@ -109,22 +133,34 @@ const loginUser = async (req, res) => {
     }
 };
 
-// @desc    Verify email
-// @route   GET /api/auth/verify-email/:token
-// @access  Public
+// @desc Verify email
+// @route GET /api/auth/verify-email/:token
+// @access Public
 const verifyEmail = async (req, res) => {
     try {
         const { token } = req.params;
 
-        const user = await User.findOne({ verificationToken: token });
+        const user = await User.findOne({
+            verificationToken: token,
+            verificationTokenExpires: { $gt: Date.now() },
+        });
 
         if (!user) {
-            return res.status(400).json({ error: 'Invalid or expired verification token' });
+            return res.status(400).json({
+                error: 'Invalid or expired verification token',
+            });
         }
 
         user.isVerified = true;
         user.verificationToken = null;
+        user.verificationTokenExpires = null;
+
         await user.save();
+
+        // If you have a frontend route, redirect there.
+        if (process.env.CLIENT_URL) {
+            return res.redirect(`${process.env.CLIENT_URL}?verified=true`);
+        }
 
         res.status(200).json({ message: 'Email verified successfully' });
     } catch (error) {
@@ -133,9 +169,62 @@ const verifyEmail = async (req, res) => {
     }
 };
 
-// @desc    Forgot password
-// @route   POST /api/auth/forgot-password
-// @access  Public
+// @desc Resend verification email
+// @route POST /api/auth/resend-verification
+// @access Public
+const resendVerificationEmail = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required' });
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({ error: 'User is already verified' });
+        }
+
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
+
+        user.verificationToken = verificationToken;
+        user.verificationTokenExpires = verificationTokenExpires;
+        await user.save();
+
+        const verifyUrl = `${getBackendBaseUrl()}/api/auth/verify-email/${verificationToken}`;
+
+        const html = `
+            <h2>Verify Your Email</h2>
+            <p>Hello ${user.firstName},</p>
+            <p>Please verify your email by clicking the link below:</p>
+            <p>
+                <a href="${verifyUrl}" target="_blank">
+                    Verify Email
+                </a>
+            </p>
+            <p>This link will expire in 24 hours.</p>
+        `;
+
+        await sendEmail(user.email, 'Verify your email address', html);
+
+        res.status(200).json({
+            message: 'Verification email sent successfully',
+        });
+    } catch (error) {
+        console.error('Resend verification error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+// @desc Forgot password
+// @route POST /api/auth/forgot-password
+// @access Public
 const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -147,15 +236,29 @@ const forgotPassword = async (req, res) => {
         }
 
         const resetToken = crypto.randomBytes(32).toString('hex');
-
         user.resetPasswordToken = resetToken;
-        user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+        user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
         await user.save();
 
-        // Normally you would email this link
+        const resetUrl = `${getBackendBaseUrl()}/api/auth/reset-password/${resetToken}`;
+
+        const html = `
+            <h2>Password Reset</h2>
+            <p>Hello ${user.firstName},</p>
+            <p>Click the link below to reset your password:</p>
+            <p>
+                <a href="${resetUrl}" target="_blank">
+                    Reset Password
+                </a>
+            </p>
+            <p>This link will expire in 15 minutes.</p>
+        `;
+
+        await sendEmail(user.email, 'Reset your password', html);
+
         res.status(200).json({
-            message: 'Password reset token generated',
-            resetToken,
+            message: 'Password reset email sent successfully',
         });
     } catch (error) {
         console.error('Forgot password error:', error);
@@ -163,9 +266,9 @@ const forgotPassword = async (req, res) => {
     }
 };
 
-// @desc    Reset password
-// @route   POST /api/auth/reset-password/:token
-// @access  Public
+// @desc Reset password
+// @route POST /api/auth/reset-password/:token
+// @access Public
 const resetPassword = async (req, res) => {
     try {
         const { token } = req.params;
@@ -184,7 +287,6 @@ const resetPassword = async (req, res) => {
             return res.status(400).json({ error: 'Invalid or expired reset token' });
         }
 
-        // Hash the new password too
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -201,12 +303,12 @@ const resetPassword = async (req, res) => {
     }
 };
 
-// @desc    Get current user
-// @route   GET /api/auth/me
-// @access  Private
+// @desc Get current user
+// @route GET /api/auth/me
+// @access Private
 const getMe = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
+        const user = await User.findById(req.user._id).select('-password');
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -223,6 +325,7 @@ module.exports = {
     registerUser,
     loginUser,
     verifyEmail,
+    resendVerificationEmail,
     forgotPassword,
     resetPassword,
     getMe,
