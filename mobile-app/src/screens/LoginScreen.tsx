@@ -15,7 +15,7 @@ import { AUTH_API_URL } from "../config/api";
 import type { ThemeColors } from "../theme/colors";
 
 type Props = {
-  onNavigate: (screen: "login" | "register" | "forgot" | "reset") => void;
+  onNavigate: (screen: "login" | "register" | "verify") => void;
   onLoginSuccess: (user: any, token: string) => void;
 };
 
@@ -30,6 +30,8 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
 
   const styles = useMemo(
     () => createStyles(colors, isWideLayout, isMobileLandscape, isMobilePortrait),
@@ -56,15 +58,38 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 403 || data.error?.toLowerCase().includes("verify")) {
+          setUnverifiedEmail(email);
+          throw new Error("Please verify your email before logging in.");
+        }
         throw new Error(data.error || "Login failed");
       }
 
       Alert.alert("Success", "Logged in successfully!");
       onLoginSuccess(data.user, data.token);
     } catch (error: any) {
-      setLoginError("Invalid Email or Password");
+      setLoginError(error.message || "Invalid Email or Password");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!unverifiedEmail) return;
+    setResendLoading(true);
+    try {
+      const response = await fetch(`${AUTH_API_URL}/resend-verification`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: unverifiedEmail })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to resend verification email");
+      Alert.alert("Sent", "A new verification email has been sent. Please check your inbox.");
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to resend the verification email.");
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -133,19 +158,32 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
             </Pressable>
 
             {!!loginError && <Text style={styles.errorText}>{loginError}</Text>}
-
-            <Pressable
-              style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
-              onPress={() => onNavigate("forgot")}
-            >
-              <Text style={styles.link}>Forgot password?</Text>
-            </Pressable>
+            {!!unverifiedEmail && (
+              <Pressable
+                style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
+                onPress={handleResendVerification}
+                disabled={resendLoading}
+              >
+                {resendLoading ? (
+                  <ActivityIndicator color={colors.accent} size="small" />
+                ) : (
+                  <Text style={[styles.link, { fontWeight: "700" }]}>Resend Verification Email</Text>
+                )}
+              </Pressable>
+            )}
 
             <Pressable
               style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
               onPress={() => onNavigate("register")}
             >
               <Text style={styles.link}>Don't have an account? Register</Text>
+            </Pressable>
+
+            <Pressable
+              style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
+              onPress={() => onNavigate("verify")}
+            >
+              <Text style={styles.link}>Have a verification token? Verify Email</Text>
             </Pressable>
           </View>
         </View>
