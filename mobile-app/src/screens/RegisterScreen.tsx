@@ -30,6 +30,7 @@ export function RegisterScreen({ onNavigate }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registerSuccess, setRegisterSuccess] = useState(false);
 
   const styles = useMemo(
     () => createStyles(colors, isWideLayout, isMobileLandscape, isMobilePortrait),
@@ -42,6 +43,7 @@ export function RegisterScreen({ onNavigate }: Props) {
       return;
     }
 
+    setRegisterSuccess(false);
     setLoading(true);
     try {
       const response = await fetch(`${AUTH_API_URL}/register`, {
@@ -63,9 +65,7 @@ export function RegisterScreen({ onNavigate }: Props) {
         throw new Error(data.error || "Failed to register");
       }
 
-      Alert.alert("Success", "Account created successfully! You can now login.", [
-        { text: "OK", onPress: () => onNavigate("login") }
-      ]);
+      setRegisterSuccess(true);
     } catch (error: any) {
       Alert.alert("Error", error.message || "An unexpected error occurred.");
     } finally {
@@ -146,6 +146,8 @@ export function RegisterScreen({ onNavigate }: Props) {
                 );
               }}
             </Pressable>
+
+            {registerSuccess && <Text style={styles.successText}>Account Created!</Text>}
 
             <Pressable
               style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
@@ -259,6 +261,13 @@ function createStyles(
     },
     buttonTextLightInteractive: {
       color: colors.accent
+    },
+    successText: {
+      marginTop: 8,
+      color: colors.text,
+      fontSize: 14,
+      fontWeight: "500",
+      textAlign: "center"
     },
     linkButton: {
       marginTop: 12

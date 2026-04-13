@@ -27,6 +27,7 @@ export function ForgotPasswordScreen({ onNavigate }: Props) {
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotError, setForgotError] = useState("");
 
   const styles = useMemo(
     () => createStyles(colors, isWideLayout, isMobileLandscape, isMobilePortrait),
@@ -35,10 +36,11 @@ export function ForgotPasswordScreen({ onNavigate }: Props) {
 
   const handleForgot = async () => {
     if (!email) {
-      Alert.alert("Error", "Please enter your registered email address.");
+      setForgotError("Invalid Email");
       return;
     }
 
+    setForgotError("");
     setLoading(true);
     try {
       const response = await fetch(`${AUTH_API_URL}/forgot-password`, {
@@ -57,7 +59,7 @@ export function ForgotPasswordScreen({ onNavigate }: Props) {
         { text: "OK", onPress: () => onNavigate("reset") }
       ]);
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Something went wrong.");
+      setForgotError("Invalid Email");
     } finally {
       setLoading(false);
     }
@@ -90,7 +92,10 @@ export function ForgotPasswordScreen({ onNavigate }: Props) {
               placeholderTextColor={colors.mutetext}
               style={styles.input}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(value) => {
+                setEmail(value);
+                if (forgotError) setForgotError("");
+              }}
               autoCapitalize="none"
               keyboardType="email-address"
             />
@@ -114,6 +119,8 @@ export function ForgotPasswordScreen({ onNavigate }: Props) {
                 );
               }}
             </Pressable>
+
+            {!!forgotError && <Text style={styles.errorText}>{forgotError}</Text>}
 
             <Pressable
               style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
@@ -233,6 +240,13 @@ function createStyles(
     },
     buttonTextLightInteractive: {
       color: colors.accent
+    },
+    errorText: {
+      marginTop: 8,
+      color: "#DC2626",
+      fontSize: 13,
+      fontWeight: "600",
+      textAlign: "center"
     },
     linkButton: {
       marginTop: 12

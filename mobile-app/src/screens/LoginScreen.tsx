@@ -29,6 +29,7 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   const styles = useMemo(
     () => createStyles(colors, isWideLayout, isMobileLandscape, isMobilePortrait),
@@ -37,10 +38,11 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Email and password are required.");
+      setLoginError("Invalid Email or Password");
       return;
     }
 
+    setLoginError("");
     setLoading(true);
     try {
       const response = await fetch(`${AUTH_API_URL}/login`, {
@@ -60,7 +62,7 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
       Alert.alert("Success", "Logged in successfully!");
       onLoginSuccess(data.user, data.token);
     } catch (error: any) {
-      Alert.alert("Authentication Failed", error.message || "Invalid credentials.");
+      setLoginError("Invalid Email or Password");
     } finally {
       setLoading(false);
     }
@@ -90,7 +92,10 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
               placeholderTextColor={colors.mutetext}
               style={styles.input}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(value) => {
+                setEmail(value);
+                if (loginError) setLoginError("");
+              }}
               autoCapitalize="none"
               keyboardType="email-address"
             />
@@ -101,7 +106,10 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
               secureTextEntry
               style={styles.input}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(value) => {
+                setPassword(value);
+                if (loginError) setLoginError("");
+              }}
             />
 
             <Pressable
@@ -123,6 +131,8 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
                 );
               }}
             </Pressable>
+
+            {!!loginError && <Text style={styles.errorText}>{loginError}</Text>}
 
             <Pressable
               style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
@@ -243,6 +253,13 @@ function createStyles(
     },
     buttonTextLightInteractive: {
       color: colors.accent
+    },
+    errorText: {
+      marginTop: 8,
+      color: "#DC2626",
+      fontSize: 13,
+      fontWeight: "600",
+      textAlign: "center"
     },
     linkButton: {
       marginTop: 12
