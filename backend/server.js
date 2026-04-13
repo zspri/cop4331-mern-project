@@ -1,43 +1,13 @@
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
-const express = require('express');
-const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
-const workoutRoutes = require('./routes/workoutRoutes');
+const app = require('./app');
 
 dotenv.config();
 
-const app = express();
 const PORT = process.env.PORT || 5001;
 
 connectDB();
 
-// Temporary permissive CORS setup for SwaggerHub/local API testing
-app.use(cors({
-    origin: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-// Handle preflight requests
-app.options(/.*/, cors());
-
-app.use(express.json());
-
-app.use((req, res, next) => {
-    console.log('Incoming request:', req.method, req.originalUrl);
-    next();
-});
-
-app.get('/api/ping', (req, res) => {
-    res.status(200).json({ message: 'API is working' });
-});
-
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/workouts', workoutRoutes);
-
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
