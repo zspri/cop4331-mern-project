@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { Platform, Pressable, SafeAreaView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
@@ -220,6 +221,24 @@ function AppContent() {
           authFlowScreen
         )}
 
+        {!isAuthenticated && (
+          <Pressable
+            style={({ hovered, pressed }: any) => [
+              styles.authThemeToggle,
+              (hovered || pressed) && styles.authThemeToggleInteractive,
+            ]}
+            onPress={toggleTheme}
+            accessibilityRole="button"
+            accessibilityLabel={mode === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          >
+            <Ionicons
+              name={mode === "light" ? "sunny-outline" : "moon-outline"}
+              size={22}
+              color={colors.accent}
+            />
+          </Pressable>
+        )}
+
       </View>
     </SafeAreaView>
   );
@@ -323,6 +342,25 @@ function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: 
     },
     tabLabelInteractive: {
       color: colors.accent
+    },
+    authThemeToggle: {
+      position: "absolute",
+      right: 16,
+      bottom: 22,
+      backgroundColor: colors.accentSoft,
+      borderWidth: 1,
+      borderColor: colors.accent + "40",
+      width: 46,
+      height: 46,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 20,
+      elevation: 10,
+    },
+    authThemeToggleInteractive: {
+      backgroundColor: colors.tileHover,
+      borderColor: colors.accent + "55",
     },
   });
 }
