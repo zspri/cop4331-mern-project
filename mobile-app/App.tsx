@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { Platform, Pressable, SafeAreaView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Platform, Pressable, SafeAreaView, StyleSheet, Text, View, useWindowDimensions, ActivityIndicator } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
@@ -13,6 +14,16 @@ import type { ThemeColors, ThemeMode } from "./src/theme/colors";
 
 type Tab = "dashboard" | "workouts" | "nutrition";
 type AuthScreen = "login" | "register" | "forgot" | "reset";
+
+const SESSION_STATE_KEY = "mm_session_state";
+
+type SessionState = {
+  tab: Tab;
+  authScreen: AuthScreen;
+  isAuthenticated: boolean;
+  currentUser: any;
+  token: string | null;
+};
 
 export default function App() {
   return (
@@ -94,6 +105,55 @@ function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [sessionHydrated, setSessionHydrated] = useState(false);
+
+  useEffect(() => {
+    const hydrateSession = async () => {
+      try {
+        const raw = await AsyncStorage.getItem(SESSION_STATE_KEY);
+        if (!raw) return;
+
+        const parsed = JSON.parse(raw) as Partial<SessionState>;
+        if (parsed.tab === "dashboard" || parsed.tab === "workouts" || parsed.tab === "nutrition") {
+          setTab(parsed.tab);
+        }
+        if (parsed.authScreen === "login" || parsed.authScreen === "register" || parsed.authScreen === "forgot" || parsed.authScreen === "reset") {
+          setAuthScreen(parsed.authScreen);
+        }
+        if (typeof parsed.isAuthenticated === "boolean") {
+          setIsAuthenticated(parsed.isAuthenticated);
+        }
+        if (typeof parsed.token === "string" || parsed.token === null) {
+          setToken(parsed.token ?? null);
+        }
+        if (parsed.currentUser !== undefined) {
+          setCurrentUser(parsed.currentUser ?? null);
+        }
+      } catch {
+        // Ignore malformed or unavailable persisted state.
+      } finally {
+        setSessionHydrated(true);
+      }
+    };
+
+    hydrateSession();
+  }, []);
+
+  useEffect(() => {
+    if (!sessionHydrated) return;
+
+    const snapshot: SessionState = {
+      tab,
+      authScreen,
+      isAuthenticated,
+      currentUser,
+      token,
+    };
+
+    AsyncStorage.setItem(SESSION_STATE_KEY, JSON.stringify(snapshot)).catch(() => {
+      // Ignore persistence write failures.
+    });
+  }, [tab, authScreen, isAuthenticated, currentUser, token, sessionHydrated]);
 
   const handleLogout = () => {
     setIsAuthenticated(false);
@@ -101,6 +161,9 @@ function AppContent() {
     setToken(null);
     setTab("dashboard");
     setAuthScreen("login");
+    AsyncStorage.removeItem(SESSION_STATE_KEY).catch(() => {
+      // Ignore storage removal failures.
+    });
   };
 
   const handleToggleTheme = () => {
@@ -148,6 +211,11 @@ function AppContent() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {!sessionHydrated ? (
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator color={colors.accent} />
+        </View>
+      ) : (
       <View style={styles.appShell}>
         {isAuthenticated ? (
           <>
@@ -240,6 +308,7 @@ function AppContent() {
         )}
 
       </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -253,6 +322,12 @@ function createStyles(colors: ThemeColors, sideGutter: number, contentMaxWidth: 
     appShell: {
       flex: 1,
       backgroundColor: colors.bg
+    },
+    loadingWrap: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.bg,
     },
     header: {
       paddingTop: 14,
