@@ -10,6 +10,7 @@ import {
 import { useTheme } from "../../theme/ThemeContext";
 import type { ThemeColors } from "../../theme/colors";
 import { Workout, authHeaders } from "./workoutTypes";
+import { resolveApiEndpoint } from "../../config/api";
 
 const WORKOUTS_GOAL = 3;
 const EXERCISES_GOAL = 15;
@@ -130,10 +131,8 @@ export function WorkoutProgressScreen({ workouts, onBack, token }: Props) {
 
   useEffect(() => {
     if (workouts.length === 0 && token) {
-      const url =
-        Platform.OS === "android"
-          ? "http://10.0.2.2:5001/api/workouts"
-          : "http://localhost:5001/api/workouts";
+      const url = resolveApiEndpoint("/workouts");
+      
       fetch(url, { headers: authHeaders(token) })
         .then((r) => r.json())
         .then((data) => { if (Array.isArray(data)) setAllWorkouts(data); })

@@ -6,11 +6,9 @@ import { WorkoutFormScreen } from "./workouts/WorkoutFormScreen";
 import { WorkoutProgressScreen } from "./workouts/WorkoutProgressScreen";
 import { Workout, WorkoutSubView, Exercise, authHeaders } from "./workouts/workoutTypes";
 import type { ThemeMode } from "../theme/colors";
+import { resolveApiEndpoint } from "../config/api";
 
-const API_URL =
-  Platform.OS === "android"
-    ? "http://10.0.2.2:5001/api/workouts"
-    : "http://localhost:5001/api/workouts";
+const API_URL = resolveApiEndpoint("/workouts");
 
 type Props = {
   token: string | null;

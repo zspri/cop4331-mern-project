@@ -47,5 +47,13 @@ function resolveApiBaseUrl(): string {
   return "http://localhost:5001";
 }
 
+/**
+ * `path` should be the URL path, e.g. `/auth`.
+ * returns the full endpoint URL, e.g. http://localhost:5001/api/auth.
+ */
+export function resolveApiEndpoint(path: string): string {
+  return `${resolveApiBaseUrl()}/api${path}`
+}
+
 export const API_BASE_URL = resolveApiBaseUrl();
-export const AUTH_API_URL = `${API_BASE_URL}/api/auth`;
+export const AUTH_API_URL = resolveApiEndpoint('/auth');

@@ -6,11 +6,9 @@ import { MealFormScreen } from "./nutrition/MealFormScreen";
 import { NutritionProgressScreen } from "./nutrition/NutritionProgressScreen";
 import { Meal, NutritionSubView, authHeaders } from "./nutrition/nutritionTypes";
 import type { ThemeMode } from "../theme/colors";
+import { resolveApiEndpoint } from "../config/api";
 
-const API_URL =
-  Platform.OS === "android"
-    ? "http://10.0.2.2:5001/api/meals"
-    : "http://localhost:5001/api/meals";
+const API_URL = resolveApiEndpoint("/meals");
 
 type Props = {
   token: string | null;
