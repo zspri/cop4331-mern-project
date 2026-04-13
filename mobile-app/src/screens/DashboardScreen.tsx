@@ -12,9 +12,7 @@ import {
 } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import type { ThemeColors, ThemeMode } from "../theme/colors";
-
-const BASE =
-  Platform.OS === "android" ? "http://10.0.2.2:5001/api" : "http://localhost:5001/api";
+import { resolveApiEndpoint } from "src/config/api";
 
 const WORKOUT_GOAL = 3;
 const PROTEIN_GOAL = 150;
@@ -64,8 +62,8 @@ export function DashboardScreen({ currentUser, token, onLogout, mode, onToggleTh
     if (!token) { setLoading(false); return; }
     setLoading(true);
     Promise.all([
-      fetch(`${BASE}/workouts`, { headers: authHeader(token) }).then((r) => r.json()),
-      fetch(`${BASE}/meals`, { headers: authHeader(token) }).then((r) => r.json()),
+      fetch(resolveApiEndpoint('/workouts'), { headers: authHeader(token) }).then((r) => r.json()),
+      fetch(resolveApiEndpoint('/meals'), { headers: authHeader(token) }).then((r) => r.json()),
     ])
       .then(([w, m]) => {
         if (Array.isArray(w)) setWorkouts(w);
