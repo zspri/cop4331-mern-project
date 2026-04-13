@@ -3,6 +3,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const workoutRoutes = require('./routes/workoutRoutes');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 
 dotenv.config();
 
@@ -25,8 +27,9 @@ app.get('/api/ping', (req, res) => {
 });
 
 app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/workouts', require('./routes/workoutRoutes'));
+app.use('/api/workouts', workoutRoutes);
 app.use('/api/meals', require('./routes/mealRoutes'));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
