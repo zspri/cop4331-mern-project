@@ -3,7 +3,7 @@ services:
     hostname: frontend
     build:
       context: ./mobile-app
-    env:
+    environment:
       - "EXPO_PUBLIC_API_BASE_URL=https://cop4331mern.zachspri.ng"
     image: mern/frontend
     restart: unless-stopped
