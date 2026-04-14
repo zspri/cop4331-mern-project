@@ -1,18 +1,20 @@
 services:
   frontend:
     hostname: frontend
-    build:
-      context: ./mobile-app
-      args:
-        - EXPO_PUBLIC_API_BASE_URL=https://cop4331mern.zachspri.ng
-    image: mern/frontend
+    #build:
+    #  context: ./mobile-app
+    #  args:
+    #    - EXPO_PUBLIC_API_BASE_URL=https://cop4331mern.zachspri.ng
+    #image: mern/frontend
+    image: ghcr.io/zspri/cop4331-mern-project-frontend:main
     restart: unless-stopped
 
   backend:
     hostname: backend
-    build:
-      context: ./backend
-    image: mern/backend
+    #build:
+    #  context: ./backend
+    #image: mern/backend
+    image: ghcr.io/zspri/cop4331-mern-project-backend:main
     volumes:
       - ./backend/.env:/app/.env:ro
     restart: unless-stopped
