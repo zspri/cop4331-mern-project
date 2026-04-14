@@ -10,7 +10,7 @@ const sendEmail = async (to, subject, html) => {
     });
 
     await transporter.sendMail({
-        from: `"MERN App" <${process.env.EMAIL_USER}>`,
+        from: `"MuscleMeter+" <${process.env.EMAIL_USER}>`,
         to,
         subject,
         html,

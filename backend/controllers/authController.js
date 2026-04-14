@@ -1,12 +1,8 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-<<<<<<< HEAD
 const bcrypt = require('bcryptjs');
 const sendEmail = require('../utils/sendEmail');
-=======
-const nodemailer = require('nodemailer');
->>>>>>> main
 
 // Generate JWT
 const generateToken = (user) => {
@@ -186,38 +182,20 @@ const resendVerificationEmail = async (req, res) => {
 
         const user = await User.findOne({ email });
 
-<<<<<<< HEAD
-=======
-        const user = await User.findOne({ email: normalizedEmail });
-
->>>>>>> main
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-<<<<<<< HEAD
         if (user.isVerified) {
             return res.status(400).json({ error: 'User is already verified' });
         }
 
         const verificationToken = crypto.randomBytes(32).toString('hex');
         const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
-=======
-        const resetPin = Math.floor(100000 + Math.random() * 900000).toString();
-
-        const hashedToken = crypto
-            .createHash('sha256')
-            .update(resetPin)
-            .digest('hex');
-
-        user.resetPasswordToken = hashedToken;
-        user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
->>>>>>> main
 
         user.verificationToken = verificationToken;
         user.verificationTokenExpires = verificationTokenExpires;
         await user.save();
-<<<<<<< HEAD
 
         const verifyUrl = `${getBackendBaseUrl()}/api/auth/verify-email/${verificationToken}`;
 
@@ -237,34 +215,6 @@ const resendVerificationEmail = async (req, res) => {
 
         res.status(200).json({
             message: 'Verification email sent successfully',
-=======
-        
-        let testAccount = await nodemailer.createTestAccount();
-        let transporter = nodemailer.createTransport({
-            host: "smtp.ethereal.email",
-            port: 587,
-            secure: false,
-            auth: {
-                user: testAccount.user,
-                pass: testAccount.pass,
-            },
-        });
-
-        let info = await transporter.sendMail({
-            from: '"MuscleMeter AI" <noreply@musclemeter.com>',
-            to: user.email,
-            subject: "Your Password Reset PIN",
-            text: `Your password reset PIN is: ${resetPin}\nIt is valid for 15 minutes.`,
-            html: `<b>Your password reset PIN is: ${resetPin}</b><br>It is valid for 15 minutes.`,
-        });
-
-        console.log("-----------------------------------------");
-        console.log("Email Preview URL: %s", nodemailer.getTestMessageUrl(info));
-        console.log("-----------------------------------------");
-
-        return res.status(200).json({
-            message: 'Password reset PIN sent',
->>>>>>> main
         });
     } catch (error) {
         console.error('Resend verification error:', error);
@@ -323,22 +273,10 @@ const resetPassword = async (req, res) => {
     try {
         const { pin, password } = req.body;
 
-<<<<<<< HEAD
         if (!password) {
             return res.status(400).json({ error: 'New password is required' });
         }
 
-=======
-        if (!pin || !password) {
-            return res.status(400).json({ error: 'PIN and New Password are required' });
-        }
-
-        const hashedToken = crypto
-            .createHash('sha256')
-            .update(pin)
-            .digest('hex');
-
->>>>>>> main
         const user = await User.findOne({
             resetPasswordToken: token,
             resetPasswordExpire: { $gt: Date.now() },
@@ -351,14 +289,9 @@ const resetPassword = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-<<<<<<< HEAD
         user.password = hashedPassword;
         user.resetPasswordToken = null;
         user.resetPasswordExpire = null;
-=======
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
->>>>>>> main
 
         await user.save();
 
