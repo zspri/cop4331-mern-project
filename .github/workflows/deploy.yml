@@ -72,3 +72,4 @@ jobs:
             cd /srv/cop4331-mern-project
             docker compose pull
             docker compose up -d
+            docker restart cop4331-mern-project-nginx-1
