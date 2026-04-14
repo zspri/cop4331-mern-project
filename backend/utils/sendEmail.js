@@ -1,19 +1,10 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const sendEmail = async (to, subject, html) => {
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-        connectionTimeout: 10000,
-    });
-
-    await transporter.sendMail({
-        from: `"MuscleMeter+" <${process.env.EMAIL_USER}>`,
+    await resend.sendMail({
+        from: `onboarding@resend.dev`,
         to,
         subject,
         html,
