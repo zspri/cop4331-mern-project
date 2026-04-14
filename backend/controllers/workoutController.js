@@ -1,5 +1,6 @@
 const Workout = require('../models/Workout');
 
+// POST /api/workouts
 const createWorkout = async (req, res) => {
     try {
         const { name, category, notes, exercises } = req.body;
@@ -23,6 +24,7 @@ const createWorkout = async (req, res) => {
     }
 };
 
+// GET /api/workouts
 const getWorkouts = async (req, res) => {
     try {
         const workouts = await Workout.find({ user: req.user._id }).sort({
@@ -36,6 +38,7 @@ const getWorkouts = async (req, res) => {
     }
 };
 
+// GET /api/workouts/:id
 const getWorkoutById = async (req, res) => {
     try {
         const workout = await Workout.findOne({
@@ -54,6 +57,7 @@ const getWorkoutById = async (req, res) => {
     }
 };
 
+// PATCH /api/workouts/:id
 const updateWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({
@@ -81,6 +85,7 @@ const updateWorkout = async (req, res) => {
     }
 };
 
+// DELETE /api/workouts/:id
 const deleteWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({
@@ -101,6 +106,7 @@ const deleteWorkout = async (req, res) => {
     }
 };
 
+// POST /api/workouts/:id/exercises
 const addExerciseToWorkout = async (req, res) => {
     try {
         const { exerciseName, sets, reps, weight, restTime } = req.body;
@@ -141,6 +147,7 @@ const addExerciseToWorkout = async (req, res) => {
     }
 };
 
+// PATCH /api/workouts/:id/exercises/:exerciseId
 const updateExerciseInWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({
@@ -178,6 +185,7 @@ const updateExerciseInWorkout = async (req, res) => {
     }
 };
 
+// DELETE /api/workouts/:id/exercises/:exerciseId
 const deleteExerciseFromWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({

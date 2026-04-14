@@ -5,6 +5,7 @@ const {
     registerUser,
     loginUser,
     verifyEmail,
+    resendVerificationEmail,
     forgotPassword,
     resetPassword,
     getMe,
@@ -15,6 +16,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.get('/verify-email/:token', verifyEmail);
+router.post('/resend-verification', resendVerificationEmail);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.get('/me', authMiddleware, getMe);
