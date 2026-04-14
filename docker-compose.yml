@@ -6,7 +6,7 @@ services:
     #  args:
     #    - EXPO_PUBLIC_API_BASE_URL=https://cop4331mern.zachspri.ng
     #image: mern/frontend
-    image: ghcr.io/zspri/cop4331-mern-project-frontend:main
+    image: ghcr.io/zspri/cop4331-mern-project-frontend:latest
     restart: unless-stopped
 
   backend:
@@ -14,7 +14,7 @@ services:
     #build:
     #  context: ./backend
     #image: mern/backend
-    image: ghcr.io/zspri/cop4331-mern-project-backend:main
+    image: ghcr.io/zspri/cop4331-mern-project-backend:latest
     volumes:
       - ./backend/.env:/app/.env:ro
     restart: unless-stopped
