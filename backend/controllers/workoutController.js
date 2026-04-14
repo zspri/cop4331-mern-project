@@ -1,6 +1,9 @@
 const Workout = require('../models/Workout');
 
+<<<<<<< HEAD
 // POST /api/workouts
+=======
+>>>>>>> main
 const createWorkout = async (req, res) => {
     try {
         const { name, category, notes, exercises } = req.body;
@@ -24,7 +27,10 @@ const createWorkout = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 // GET /api/workouts
+=======
+>>>>>>> main
 const getWorkouts = async (req, res) => {
     try {
         const workouts = await Workout.find({ user: req.user._id }).sort({
@@ -38,7 +44,10 @@ const getWorkouts = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 // GET /api/workouts/:id
+=======
+>>>>>>> main
 const getWorkoutById = async (req, res) => {
     try {
         const workout = await Workout.findOne({
@@ -57,7 +66,10 @@ const getWorkoutById = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 // PATCH /api/workouts/:id
+=======
+>>>>>>> main
 const updateWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({
@@ -85,7 +97,10 @@ const updateWorkout = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 // DELETE /api/workouts/:id
+=======
+>>>>>>> main
 const deleteWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({
@@ -106,7 +121,10 @@ const deleteWorkout = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 // POST /api/workouts/:id/exercises
+=======
+>>>>>>> main
 const addExerciseToWorkout = async (req, res) => {
     try {
         const { exerciseName, sets, reps, weight, restTime } = req.body;
@@ -147,7 +165,10 @@ const addExerciseToWorkout = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 // PATCH /api/workouts/:id/exercises/:exerciseId
+=======
+>>>>>>> main
 const updateExerciseInWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({
@@ -185,7 +206,10 @@ const updateExerciseInWorkout = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 // DELETE /api/workouts/:id/exercises/:exerciseId
+=======
+>>>>>>> main
 const deleteExerciseFromWorkout = async (req, res) => {
     try {
         const workout = await Workout.findOne({

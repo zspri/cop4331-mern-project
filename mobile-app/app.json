@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "MuscleMeter+",
+    "slug": "musclemeter-plus",
+    "version": "1.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
