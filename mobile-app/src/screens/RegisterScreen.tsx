@@ -15,7 +15,7 @@ import { AUTH_API_URL } from "../config/api";
 import type { ThemeColors } from "../theme/colors";
 
 type Props = {
-  onNavigate: (screen: "login" | "register" | "forgot" | "reset") => void;
+  onNavigate: (screen: "login" | "register" | "verify") => void;
 };
 
 export function RegisterScreen({ onNavigate }: Props) {
@@ -147,7 +147,11 @@ export function RegisterScreen({ onNavigate }: Props) {
               }}
             </Pressable>
 
-            {registerSuccess && <Text style={styles.successText}>Account Created!</Text>}
+            {registerSuccess && (
+              <Text style={styles.successText}>
+                Account created! Please check your email and verify your account before logging in.
+              </Text>
+            )}
 
             <Pressable
               style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}

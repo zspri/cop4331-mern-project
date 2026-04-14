@@ -3,17 +3,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { Platform, Pressable, SafeAreaView, StyleSheet, Text, View, useWindowDimensions, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
-import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
 import { NutritionScreen } from "./src/screens/NutritionScreen";
 import { RegisterScreen } from "./src/screens/RegisterScreen";
-import { ResetPasswordScreen } from "./src/screens/ResetPasswordScreen";
+import { VerifyEmailScreen } from "./src/screens/VerifyEmailScreen";
 import { WorkoutsScreen } from "./src/screens/WorkoutsScreen";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import type { ThemeColors, ThemeMode } from "./src/theme/colors";
 
 type Tab = "dashboard" | "workouts" | "nutrition";
-type AuthScreen = "login" | "register" | "forgot" | "reset";
+type AuthScreen = "login" | "register" | "verify";
 
 const SESSION_STATE_KEY = "mm_session_state";
 
@@ -117,7 +116,7 @@ function AppContent() {
         if (parsed.tab === "dashboard" || parsed.tab === "workouts" || parsed.tab === "nutrition") {
           setTab(parsed.tab);
         }
-        if (parsed.authScreen === "login" || parsed.authScreen === "register" || parsed.authScreen === "forgot" || parsed.authScreen === "reset") {
+        if (parsed.authScreen === "login" || parsed.authScreen === "register" || parsed.authScreen === "verify") {
           setAuthScreen(parsed.authScreen);
         }
         if (typeof parsed.isAuthenticated === "boolean") {
@@ -181,32 +180,25 @@ function AppContent() {
   }, [tab, currentUser, token, mode]);
 
   const authFlowScreen = useMemo(() => {
-    if (authScreen === "login") {
-      return (
-        <LoginScreen
-          onNavigate={setAuthScreen}
-          onLoginSuccess={(user, tok) => {
-            setCurrentUser(user);
-            setToken(tok);
-            setIsAuthenticated(true);
-          }}
-        />
-      );
+    switch (authScreen) {
+      case "login":
+        return (
+          <LoginScreen
+            onNavigate={setAuthScreen}
+            onLoginSuccess={(user, tok) => {
+              setCurrentUser(user);
+              setToken(tok);
+              setIsAuthenticated(true);
+            }}
+          />
+        );
+      case "register":
+        return <RegisterScreen onNavigate={setAuthScreen} />;
+      case "verify":
+        return <VerifyEmailScreen onNavigate={setAuthScreen} />;
+      default:
+        return <LoginScreen onNavigate={setAuthScreen} onLoginSuccess={() => {}} />;
     }
-
-    if (authScreen === "register") {
-      return (
-        <RegisterScreen
-          onNavigate={setAuthScreen}
-        />
-      );
-    }
-
-    if (authScreen === "forgot") {
-      return <ForgotPasswordScreen onNavigate={setAuthScreen} />;
-    }
-
-    return <ResetPasswordScreen onNavigate={setAuthScreen} />;
   }, [authScreen]);
 
   return (

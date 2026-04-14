@@ -13,48 +13,39 @@ import { AUTH_API_URL } from "../config/api";
 import type { ThemeColors } from "../theme/colors";
 
 type Props = {
-  onNavigate: (screen: "login" | "register" | "forgot" | "reset") => void;
+  onNavigate: (screen: "login" | "register" | "verify") => void;
 };
 
-export function ResetPasswordScreen({ onNavigate }: Props) {
+export function VerifyEmailScreen({ onNavigate }: Props) {
   const { colors, mode } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const [pin, setPin] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleReset = async () => {
-    if (!pin || !password || !confirmPassword) {
-      Alert.alert("Error", "Please fill out all fields.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match.");
+  const handleVerify = async () => {
+    if (!token) {
+      Alert.alert("Error", "Please enter the verification token.");
       return;
     }
 
     setLoading(true);
     try {
-      const response = await fetch(`${AUTH_API_URL}/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin, password })
+      const response = await fetch(`${AUTH_API_URL}/verify-email/${token}`, {
+        method: "GET"
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to reset password");
+        throw new Error(data.error || "Failed to verify email");
       }
 
-      Alert.alert("Success", "Password reset successfully! You can now login.", [
+      Alert.alert("Success", "Email verified successfully! You can now log in.", [
         { text: "OK", onPress: () => onNavigate("login") }
       ]);
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Invalid or expired PIN.");
+      Alert.alert("Error", error.message || "Invalid or expired token.");
     } finally {
       setLoading(false);
     }
@@ -67,35 +58,17 @@ export function ResetPasswordScreen({ onNavigate }: Props) {
         <Text style={styles.tagline}>Train smarter. Recover better.</Text>
 
         <View style={styles.card}>
-          <Text style={styles.title}>Reset password</Text>
-          <Text style={styles.description}>Enter your 6-digit PIN and your new password below.</Text>
+          <Text style={styles.title}>Verify Email</Text>
+          <Text style={styles.description}>Enter the verification token from your email.</Text>
 
           <TextInput
-            placeholder="6-Digit PIN"
+            placeholder="Verification Token"
             placeholderTextColor={colors.mutetext}
             style={styles.input}
-            value={pin}
-            onChangeText={setPin}
-            keyboardType="number-pad"
-            maxLength={6}
-          />
-
-          <TextInput
-            placeholder="New password"
-            placeholderTextColor={colors.mutetext}
-            secureTextEntry
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-          />
-
-          <TextInput
-            placeholder="Confirm new password"
-            placeholderTextColor={colors.mutetext}
-            secureTextEntry
-            style={styles.input}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
+            value={token}
+            onChangeText={setToken}
+            autoCapitalize="none"
+            autoCorrect={false}
           />
 
           <Pressable
@@ -104,7 +77,7 @@ export function ResetPasswordScreen({ onNavigate }: Props) {
               (hovered || pressed) && styles.buttonInteractive,
               loading && styles.buttonDisabled
             ]}
-            onPress={handleReset}
+            onPress={handleVerify}
             disabled={loading}
           >
             {({ hovered, pressed }: any) => {
@@ -113,7 +86,7 @@ export function ResetPasswordScreen({ onNavigate }: Props) {
               return loading ? (
                 <ActivityIndicator color={useLightInvert ? colors.accent : "#fff"} />
               ) : (
-                <Text style={[styles.buttonText, useLightInvert && styles.buttonTextLightInteractive]}>Reset Password</Text>
+                <Text style={[styles.buttonText, useLightInvert && styles.buttonTextLightInteractive]}>Verify Account</Text>
               );
             }}
           </Pressable>
