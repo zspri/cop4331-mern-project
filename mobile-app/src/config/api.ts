@@ -5,6 +5,26 @@ function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
 }
 
+function normalizeHost(hostUri: string): string {
+  const withoutProtocol = hostUri.replace(/^https?:\/\//, "");
+  const firstSegment = withoutProtocol.split("/")[0] || "";
+
+  // Handle bracketed IPv6 host, e.g. [::1]:8081
+  if (firstSegment.startsWith("[")) {
+    const end = firstSegment.indexOf("]");
+    if (end > 0) {
+      return firstSegment.slice(1, end);
+    }
+  }
+
+  return firstSegment.split(":")[0] || "";
+}
+
+function isLoopbackHost(host: string): boolean {
+  const normalized = host.toLowerCase();
+  return normalized === "localhost" || normalized === "127.0.0.1" || normalized === "::1";
+}
+
 function getExpoHostBaseUrl(): string | null {
   const constantsAny = Constants as any;
   const hostUri =
@@ -17,9 +37,14 @@ function getExpoHostBaseUrl(): string | null {
     return null;
   }
 
-  const host = hostUri.split(":")[0];
+  const host = normalizeHost(hostUri);
   if (!host) {
     return null;
+  }
+
+  // Android emulator cannot reach localhost on the dev machine directly.
+  if (Platform.OS === "android" && isLoopbackHost(host)) {
+    return "http://10.0.2.2:5001";
   }
 
   return `http://${host}:5001`;
