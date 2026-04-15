@@ -13,6 +13,8 @@ Full-stack fitness tracking project with:
 - nginx: reverse proxy config for Docker deployment
 - docker-compose.yml: production-style multi-container web stack
 
+Backend-specific setup and route docs: backend/README.md
+
 ## Current Capabilities
 
 ### Backend (mounted and active)
@@ -127,6 +129,22 @@ Notes:
 
 - This serves the exported web frontend, not Expo native runtime.
 - Mobile emulator should still use Expo workflow (Mode A), not Docker web frontend.
+
+## Quick Startup Matrix
+
+Use this section when you want the fastest safe command set by scenario.
+
+| Scenario | Terminal 1 | Terminal 2 | Result |
+| --- | --- | --- | --- |
+| Native mobile dev (Android/iOS) | `cd backend && npm run dev` | `cd mobile-app && npx expo start -c` | Expo native app talks to local API |
+| Mobile web dev | `cd backend && npm run dev` | `cd mobile-app && set EXPO_PUBLIC_API_BASE_URL=http://localhost:5001 && npx expo start --web` | Expo web app talks to local API |
+| Docker web stack | `docker compose up -d` | none | Nginx serves web frontend and proxies /api |
+
+Safety checks before login/signup testing:
+
+1. Confirm backend health: `http://localhost:5001/api/ping`.
+2. Ensure only one backend is bound to port 5001.
+3. For Android emulator, ensure API host resolves to `10.0.2.2` when backend runs on host machine.
 
 ## Verification Checklist
 
