@@ -1,18 +1,98 @@
-# MuscleMeter+ Mobile Starter
+# MuscleMeter+ Mobile App
 
-Basic React Native (Expo + TypeScript) starter for workout + diet tracking.
+Expo React Native frontend for auth, dashboard, workouts, and nutrition workflows.
 
-## Quick Start
+## Platform Targets
+
+- Android emulator/device
+- iOS simulator/device
+- Web (Expo web)
+
+## Tech Stack
+
+- Expo SDK 55
+- React Native 0.83.x
+- React 19
+- TypeScript
+- AsyncStorage session persistence
+
+## Current Mobile Capabilities
+
+- Authentication UI:
+  - Login
+  - Register
+  - Verify email
+  - Resend verification email
+- Dashboard summary cards and readiness guidance
+- Workouts CRUD screens
+- Nutrition CRUD screens (requires /api/meals on backend)
+- Theme toggling and persisted session state
+
+## Backend Dependency
+
+The app expects the backend API base URL and calls endpoints like:
+
+- /api/auth/*
+- /api/workouts/*
+- /api/meals/*
+
+Important:
+
+- Auth and workouts are mounted in backend/app.js.
+- Meals routes exist in backend files but are not mounted by default, so nutrition API operations can fail until backend wiring is completed.
+
+## Safe Run Workflow (Recommended)
+
+1. Start backend first:
 
 ```bash
-cd mobile-app
+cd ../backend
 npm install
-npm run start
+npm run dev
 ```
 
-Then open on Android emulator/device from Expo.
+2. Verify backend health:
 
-## Folder Schema
+```bash
+curl http://localhost:5001/api/ping
+```
+
+3. Start Expo with clean cache:
+
+```bash
+cd ../mobile-app
+npm install
+npx expo start -c
+```
+
+4. Launch target platform from Expo UI.
+
+## Environment Configuration
+
+Optional override:
+
+- EXPO_PUBLIC_API_BASE_URL
+
+Examples:
+
+- Web local backend: http://localhost:5001
+- Android emulator to host backend: http://10.0.2.2:5001
+
+Notes:
+
+- The app includes runtime host resolution logic and Android loopback handling.
+- If you still see transport errors, explicitly set EXPO_PUBLIC_API_BASE_URL and restart Expo.
+
+## Scripts
+
+```bash
+npm run start
+npm run android
+npm run ios
+npm run web
+```
+
+## Project Layout
 
 ```text
 mobile-app/
@@ -22,34 +102,37 @@ mobile-app/
   tsconfig.json
   src/
     components/
-      StatCard.tsx
+    config/
+      api.ts
     data/
-      seed.ts
     features/
-      recommendations.ts
     screens/
       DashboardScreen.tsx
-      WorkoutsScreen.tsx
+      LoginScreen.tsx
       NutritionScreen.tsx
+      RegisterScreen.tsx
+      VerifyEmailScreen.tsx
+      WorkoutsScreen.tsx
+      nutrition/
+      workouts/
     theme/
-      colors.ts
     types/
-      models.ts
 ```
 
-## Data Schema (Core Entities)
+## Troubleshooting
 
-- `WorkoutEntry`: date, type, duration, effort
-- `MealEntry`: calories + macro breakdown + quality score
-- `RecoveryEntry`: sleep, soreness, stress
-- `UserProfile`: calorie/protein targets + weekly workout goal
+### Network request failed
 
-## Why This Stands Out
+1. Confirm backend is running on port 5001.
+2. Confirm /api/ping returns API is working.
+3. Restart Expo with npx expo start -c.
+4. For Android emulator, ensure API target resolves to 10.0.2.2 when backend is on host machine.
 
-A simple tracker is common. The `readiness score` makes this more useful:
+### Login should return verify-email but does not
 
-- It combines sleep + soreness + stress.
-- It gives a daily coach tip (push hard, deload, or prioritize protein).
-- It is lightweight to compute and easy to demo in a class project.
+- This usually means request transport failed before backend response.
+- Fix connectivity first, then retry login.
 
-This gives your app a "smart coach" angle without requiring heavy ML.
+### Nutrition screens load errors
+
+- Backend /api/meals route must be mounted in backend/app.js for full nutrition API support.
