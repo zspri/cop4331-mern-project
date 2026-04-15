@@ -35,10 +35,12 @@ export function NutritionScreen({ token, currentUser, mode, onToggleTheme }: Pro
     setLoading(true);
     try {
       const res = await fetch(API_URL, { headers: authHeaders(token) });
-      const data = await res.json();
+      const contentType = res.headers.get("content-type") || "";
+      const data = contentType.includes("application/json") ? await res.json() : null;
       if (res.ok) setMeals(data);
-      else Alert.alert("Error", data.error || "Failed to load meals");
-    } catch {
+      else if (res.status === 404) Alert.alert("Error", "Nutrition API is not available on this backend yet.");
+      else Alert.alert("Error", data?.error || "Failed to load meals");
+    } catch (error) {
       Alert.alert("Error", "Could not connect to server");
     } finally {
       setLoading(false);
@@ -89,10 +91,12 @@ export function NutritionScreen({ token, currentUser, mode, onToggleTheme }: Pro
           date: formDate,
         }),
       });
-      const data = await res.json();
+      const contentType = res.headers.get("content-type") || "";
+      const data = contentType.includes("application/json") ? await res.json() : null;
       if (res.ok) setSubView("list");
-      else Alert.alert("Error", data.error || "Failed to add meal");
-    } catch {
+      else if (res.status === 404) Alert.alert("Error", "Nutrition API is not available on this backend yet.");
+      else Alert.alert("Error", data?.error || "Failed to add meal");
+    } catch (error) {
       Alert.alert("Error", "Could not connect to server");
     } finally {
       setLoading(false);
@@ -115,10 +119,12 @@ export function NutritionScreen({ token, currentUser, mode, onToggleTheme }: Pro
           date: formDate,
         }),
       });
-      const data = await res.json();
+      const contentType = res.headers.get("content-type") || "";
+      const data = contentType.includes("application/json") ? await res.json() : null;
       if (res.ok) setSubView("list");
-      else Alert.alert("Error", data.error || "Failed to update meal");
-    } catch {
+      else if (res.status === 404) Alert.alert("Error", "Nutrition API is not available on this backend yet.");
+      else Alert.alert("Error", data?.error || "Failed to update meal");
+    } catch (error) {
       Alert.alert("Error", "Could not connect to server");
     } finally {
       setLoading(false);
@@ -136,10 +142,12 @@ export function NutritionScreen({ token, currentUser, mode, onToggleTheme }: Pro
         setSelectedMeal(null);
         setSubView("list");
       } else {
-        const data = await res.json();
-        Alert.alert("Error", data.error || "Failed to delete");
+        const contentType = res.headers.get("content-type") || "";
+        const data = contentType.includes("application/json") ? await res.json() : null;
+        if (res.status === 404) Alert.alert("Error", "Nutrition API is not available on this backend yet.");
+        else Alert.alert("Error", data?.error || "Failed to delete");
       }
-    } catch {
+    } catch (error) {
       Alert.alert("Error", "Could not connect to server");
     }
   };

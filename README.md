@@ -26,10 +26,15 @@ Backend-specific setup and route docs: backend/README.md
   - nested exercise add/update/delete
 - Health endpoint: GET /api/ping
 
-### Backend (implemented but not mounted by default)
+### Recently Added in Source
 
-- Meal endpoints exist in route/controller files, but /api/meals is not currently mounted in backend/app.js.
-- The mobile nutrition screens call /api/meals, so nutrition API calls will fail until meals are mounted.
+- Meal endpoints are mounted in backend/app.js in the source tree now.
+- If your hosted backend was deployed before this change, it must be redeployed before the nutrition tab will work there.
+
+### Backend (deployment note)
+
+- The nutrition tab depends on /api/meals.
+- Source is fixed in this repo, but any externally hosted backend must be rebuilt/redeployed to pick up the new route.
 
 ### Mobile App
 
@@ -79,6 +84,16 @@ Notes:
 - Login for existing verified users still depends on backend availability and DB connectivity.
 
 ## Run Modes
+
+### Mode 0: Hosted API demo (no local backend required)
+
+```bash
+cd mobile-app
+npm install
+npm run start:hosted
+```
+
+Use this mode for classroom demos when you want to avoid local backend startup.
 
 ### Mode A: Local Backend + Mobile Native (recommended for development)
 
@@ -136,6 +151,7 @@ Use this section when you want the fastest safe command set by scenario.
 
 | Scenario | Terminal 1 | Terminal 2 | Result |
 | --- | --- | --- | --- |
+| Hosted API demo (no local backend) | `cd mobile-app && npm run start:hosted` | none | Expo mobile app talks to hosted API |
 | Native mobile dev (Android/iOS) | `cd backend && npm run dev` | `cd mobile-app && npx expo start -c` | Expo native app talks to local API |
 | Mobile web dev | `cd backend && npm run dev` | `cd mobile-app && set EXPO_PUBLIC_API_BASE_URL=http://localhost:5001 && npx expo start --web` | Expo web app talks to local API |
 | Docker web stack | `docker compose up -d` | none | Nginx serves web frontend and proxies /api |
@@ -145,6 +161,7 @@ Safety checks before login/signup testing:
 1. Confirm backend health: `http://localhost:5001/api/ping`.
 2. Ensure only one backend is bound to port 5001.
 3. For Android emulator, ensure API host resolves to `10.0.2.2` when backend runs on host machine.
+4. For hosted demos, confirm `https://cop4331mern.zachspri.ng/api/ping` before opening Expo.
 
 ## Verification Checklist
 
@@ -164,8 +181,8 @@ Safety checks before login/signup testing:
 
 ### Nutrition requests fail
 
-- /api/meals is not mounted in backend/app.js currently.
-- Mount meal routes before expecting nutrition CRUD to work end-to-end.
+- If you are using a hosted backend, redeploy the backend so it includes the /api/meals route.
+- If you are running locally, make sure backend/app.js includes app.use('/api/meals', mealRoutes).
 
 ### Email verification/register errors
 

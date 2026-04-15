@@ -2,6 +2,8 @@
 
 Expo React Native frontend for auth, dashboard, workouts, and nutrition workflows.
 
+Default API target: hosted backend at https://cop4331mern.zachspri.ng
+
 ## Platform Targets
 
 - Android emulator/device
@@ -43,6 +45,18 @@ Important:
 
 ## Safe Run Workflow (Recommended)
 
+### Option A: Hosted API demo mode (no local backend required)
+
+```bash
+cd mobile-app
+npm install
+npm run start:hosted
+```
+
+This is the safest demo path when you do not want to run backend locally.
+
+### Option B: Local backend mode (for backend debugging)
+
 1. Start backend first:
 
 ```bash
@@ -75,18 +89,20 @@ Optional override:
 
 Examples:
 
-- Web local backend: http://localhost:5001
-- Android emulator to host backend: http://10.0.2.2:5001
+- Hosted backend: https://cop4331mern.zachspri.ng
+- Android emulator local backend: http://10.0.2.2:5001
 
 Notes:
 
-- The app includes runtime host resolution logic and Android loopback handling.
+- The app defaults to hosted API when EXPO_PUBLIC_API_BASE_URL is not provided.
 - If you still see transport errors, explicitly set EXPO_PUBLIC_API_BASE_URL and restart Expo.
 
 ## Scripts
 
 ```bash
 npm run start
+npm run start:hosted
+npm run start:local
 npm run android
 npm run ios
 npm run web
@@ -126,7 +142,8 @@ mobile-app/
 1. Confirm backend is running on port 5001.
 2. Confirm /api/ping returns API is working.
 3. Restart Expo with npx expo start -c.
-4. For Android emulator, ensure API target resolves to 10.0.2.2 when backend is on host machine.
+4. If using hosted mode, confirm https://cop4331mern.zachspri.ng/api/ping is reachable.
+5. If using local mode, ensure API target is http://10.0.2.2:5001 on Android emulator.
 
 ### Login should return verify-email but does not
 
@@ -135,4 +152,5 @@ mobile-app/
 
 ### Nutrition screens load errors
 
-- Backend /api/meals route must be mounted in backend/app.js for full nutrition API support.
+- If the backend is local, make sure /api/meals is mounted in backend/app.js.
+- If the backend is hosted, the deployment must include the latest backend build with /api/meals.

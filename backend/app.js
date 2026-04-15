@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const workoutRoutes = require('./routes/workoutRoutes');
+const mealRoutes = require('./routes/mealRoutes');
 
 dotenv.config();
 
@@ -21,5 +22,6 @@ app.get('/api/ping', (req, res) => {
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/workouts', workoutRoutes);
+app.use('/api/meals', mealRoutes);
 
 module.exports = app;

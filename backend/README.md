@@ -30,10 +30,11 @@ Express + MongoDB backend for authentication, workouts, and supporting account f
   - PATCH /:id/exercises/:exerciseId
   - DELETE /:id/exercises/:exerciseId
 
-## Implemented But Not Mounted
+## Nutrition Routes
 
 - /api/meals routes exist in backend/routes/mealRoutes.js and backend/controllers/mealController.js.
-- They are not currently mounted in backend/app.js.
+- They are mounted in backend/app.js in this source tree.
+- If you are using an externally hosted backend, redeploy it so the new route is included.
 
 ## Environment Variables
 
@@ -106,3 +107,8 @@ npm test
 
 - Ensure RESEND_API_KEY and RESEND_EMAIL_ADDRESS are configured.
 - Confirm sender domain/address is valid in Resend.
+
+### Nutrition tab still reports a server problem
+
+- Make sure the backend version you are using includes /api/meals.
+- If you are using the hosted deployment, rebuild/redeploy the backend after pulling this change.
