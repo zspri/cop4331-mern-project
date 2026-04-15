@@ -15,17 +15,14 @@ const getResendClient = () => {
 };
 
 const sendEmail = async (to, subject, html) => {
-    const client = getResendClient();
-    if (!client) {
-        throw new Error('Email service is not configured (missing RESEND_API_KEY).');
-    }
-
-    await client.emails.send({
-        from: `onboarding@resend.dev`,
+    const email = await resend.emails.send({
+        from: process.env.RESEND_EMAIL_ADDRESS,
         to,
         subject,
         html,
     });
+
+    console.log(email);
 };
 
 module.exports = sendEmail;
