@@ -218,7 +218,11 @@ const resendVerificationEmail = async (req, res) => {
         });
     } catch (error) {
         console.error('Resend verification error:', error);
-        res.status(500).json({ error: 'Server error' });
+        const message = typeof error?.message === 'string' ? error.message : '';
+        if (message.includes('Email service is not configured')) {
+            return res.status(503).json({ error: message });
+        }
+        return res.status(500).json({ error: 'Failed to send verification email' });
     }
 };
 
