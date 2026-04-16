@@ -1,9 +1,11 @@
 {
   "scripts": {
     "mobile": "npm --prefix mobile-app run start",
+    "mobile:demo": "npm --prefix mobile-app run start:demo",
     "mobile:android": "npm --prefix mobile-app run android",
     "mobile:ios": "npm --prefix mobile-app run ios",
-    "mobile:web": "npm --prefix mobile-app run web"
+    "mobile:web": "npm --prefix mobile-app run web",
+    "mobile:verify": "npm --prefix mobile-app run verify"
   },
   "dependencies": {
     "@expo/metro-runtime": "~55.0.7",

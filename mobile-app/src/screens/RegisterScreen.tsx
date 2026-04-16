@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import { AUTH_API_URL } from "../config/api";
+import { apiRequest } from "../config/http";
 import type { ThemeColors } from "../theme/colors";
 
 type Props = {
@@ -46,7 +47,7 @@ export function RegisterScreen({ onNavigate }: Props) {
     setRegisterSuccess(false);
     setLoading(true);
     try {
-      const response = await fetch(`${AUTH_API_URL}/register`, {
+      const result = await apiRequest(`${AUTH_API_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -59,10 +60,8 @@ export function RegisterScreen({ onNavigate }: Props) {
         })
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to register");
+      if (!result.ok) {
+        throw new Error(result.error || "Failed to register");
       }
 
       setRegisterSuccess(true);

@@ -18,7 +18,7 @@ Express + MongoDB backend for authentication, workouts, and supporting account f
   - GET /verify-email/:token
   - POST /resend-verification
   - POST /forgot-password
-  - POST /reset-password
+  - POST /reset-password/:token
   - GET /me (auth required)
 - /api/workouts (auth required)
   - POST /
@@ -48,12 +48,13 @@ RESEND_API_KEY=<required_for_email_flows>
 RESEND_EMAIL_ADDRESS=<verified_sender_address>
 BACKEND_URL=http://localhost:5001
 CLIENT_URL=http://localhost:19006
+DISABLE_EMAIL_VERIFICATION_FALLBACK=false
 ```
 
 Notes:
 
 - Register, verify, resend, forgot/reset password flows depend on email service configuration.
-- Missing RESEND variables can break email flows.
+- In non-production environments, register will auto-verify users when email is not configured unless DISABLE_EMAIL_VERIFICATION_FALLBACK=true.
 
 ## Safe Local Run
 

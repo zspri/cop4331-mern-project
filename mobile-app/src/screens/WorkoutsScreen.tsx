@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 import { WorkoutListScreen } from "./workouts/WorkoutListScreen";
 import { WorkoutDetailScreen } from "./workouts/WorkoutDetailScreen";
 import { WorkoutFormScreen } from "./workouts/WorkoutFormScreen";
@@ -7,6 +7,7 @@ import { WorkoutProgressScreen } from "./workouts/WorkoutProgressScreen";
 import { Workout, WorkoutSubView, Exercise, authHeaders } from "./workouts/workoutTypes";
 import type { ThemeMode } from "../theme/colors";
 import { resolveApiEndpoint } from "../config/api";
+import { apiRequest } from "../config/http";
 
 const API_URL = resolveApiEndpoint("/workouts");
 
@@ -32,10 +33,12 @@ export function WorkoutsScreen({ token, currentUser, mode, onToggleTheme }: Prop
     if (!token) return;
     setLoading(true);
     try {
-      const res = await fetch(API_URL, { headers: authHeaders(token) });
-      const data = await res.json();
-      if (res.ok) setWorkouts(data);
-      else Alert.alert("Error", data.error || "Failed to load workouts");
+      const result = await apiRequest<Workout[]>(API_URL, { headers: authHeaders(token) });
+      if (result.ok && Array.isArray(result.data)) {
+        setWorkouts(result.data);
+      } else {
+        Alert.alert("Error", result.error || "Failed to load workouts");
+      }
     } catch {
       Alert.alert("Error", "Could not connect to server");
     } finally {
@@ -80,7 +83,7 @@ export function WorkoutsScreen({ token, currentUser, mode, onToggleTheme }: Prop
     if (!formName.trim()) { Alert.alert("Error", "Workout name is required"); return; }
     setLoading(true);
     try {
-      const res = await fetch(API_URL, {
+      const result = await apiRequest(API_URL, {
         method: "POST",
         headers: authHeaders(token),
         body: JSON.stringify({
@@ -98,9 +101,8 @@ export function WorkoutsScreen({ token, currentUser, mode, onToggleTheme }: Prop
             })),
         }),
       });
-      const data = await res.json();
-      if (res.ok) { setSubView("list"); }
-      else Alert.alert("Error", data.error || "Failed to add workout");
+      if (result.ok) { setSubView("list"); }
+      else Alert.alert("Error", result.error || "Failed to add workout");
     } catch {
       Alert.alert("Error", "Could not connect to server");
     } finally {
@@ -112,7 +114,7 @@ export function WorkoutsScreen({ token, currentUser, mode, onToggleTheme }: Prop
     if (!selectedWorkout || !formName.trim()) { Alert.alert("Error", "Workout name is required"); return; }
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/${selectedWorkout._id}`, {
+      const result = await apiRequest(`${API_URL}/${selectedWorkout._id}`, {
         method: "PATCH",
         headers: authHeaders(token),
         body: JSON.stringify({
@@ -131,9 +133,8 @@ export function WorkoutsScreen({ token, currentUser, mode, onToggleTheme }: Prop
             })),
         }),
       });
-      const data = await res.json();
-      if (res.ok) { setSubView("list"); }
-      else Alert.alert("Error", data.error || "Failed to update workout");
+      if (result.ok) { setSubView("list"); }
+      else Alert.alert("Error", result.error || "Failed to update workout");
     } catch {
       Alert.alert("Error", "Could not connect to server");
     } finally {
@@ -143,17 +144,16 @@ export function WorkoutsScreen({ token, currentUser, mode, onToggleTheme }: Prop
 
   const handleDelete = async (w: Workout) => {
     try {
-      const res = await fetch(`${API_URL}/${w._id}`, {
+      const result = await apiRequest(`${API_URL}/${w._id}`, {
         method: "DELETE",
         headers: authHeaders(token),
       });
-      if (res.ok) {
+      if (result.ok) {
         setWorkouts((prev) => prev.filter((item) => item._id !== w._id));
         setSelectedWorkout(null);
         setSubView("list");
       } else {
-        const data = await res.json();
-        Alert.alert("Error", data.error || "Failed to delete");
+        Alert.alert("Error", result.error || "Failed to delete");
       }
     } catch {
       Alert.alert("Error", "Could not connect to server");

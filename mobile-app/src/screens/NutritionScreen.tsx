@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 import { MealListScreen } from "./nutrition/MealListScreen";
 import { MealDetailScreen } from "./nutrition/MealDetailScreen";
 import { MealFormScreen } from "./nutrition/MealFormScreen";
@@ -7,6 +7,7 @@ import { NutritionProgressScreen } from "./nutrition/NutritionProgressScreen";
 import { Meal, NutritionSubView, authHeaders } from "./nutrition/nutritionTypes";
 import type { ThemeMode } from "../theme/colors";
 import { resolveApiEndpoint } from "../config/api";
+import { apiRequest } from "../config/http";
 
 const API_URL = resolveApiEndpoint("/meals");
 
@@ -34,12 +35,14 @@ export function NutritionScreen({ token, currentUser, mode, onToggleTheme }: Pro
     if (!token) return;
     setLoading(true);
     try {
-      const res = await fetch(API_URL, { headers: authHeaders(token) });
-      const contentType = res.headers.get("content-type") || "";
-      const data = contentType.includes("application/json") ? await res.json() : null;
-      if (res.ok) setMeals(data);
-      else if (res.status === 404) Alert.alert("Error", "Nutrition API is not available on this backend yet.");
-      else Alert.alert("Error", data?.error || "Failed to load meals");
+      const result = await apiRequest<Meal[]>(API_URL, { headers: authHeaders(token) });
+      if (result.ok && Array.isArray(result.data)) {
+        setMeals(result.data);
+      } else if (result.status === 404) {
+        Alert.alert("Error", "Nutrition API is not available on this backend yet.");
+      } else {
+        Alert.alert("Error", result.error || "Failed to load meals");
+      }
     } catch (error) {
       Alert.alert("Error", "Could not connect to server");
     } finally {
@@ -79,7 +82,7 @@ export function NutritionScreen({ token, currentUser, mode, onToggleTheme }: Pro
     if (!formName.trim()) { Alert.alert("Error", "Meal name is required"); return; }
     setLoading(true);
     try {
-      const res = await fetch(API_URL, {
+      const result = await apiRequest(API_URL, {
         method: "POST",
         headers: authHeaders(token),
         body: JSON.stringify({
@@ -91,11 +94,9 @@ export function NutritionScreen({ token, currentUser, mode, onToggleTheme }: Pro
           date: formDate,
         }),
       });
-      const contentType = res.headers.get("content-type") || "";
-      const data = contentType.includes("application/json") ? await res.json() : null;
-      if (res.ok) setSubView("list");
-      else if (res.status === 404) Alert.alert("Error", "Nutrition API is not available on this backend yet.");
-      else Alert.alert("Error", data?.error || "Failed to add meal");
+      if (result.ok) setSubView("list");
+      else if (result.status === 404) Alert.alert("Error", "Nutrition API is not available on this backend yet.");
+      else Alert.alert("Error", result.error || "Failed to add meal");
     } catch (error) {
       Alert.alert("Error", "Could not connect to server");
     } finally {
@@ -107,7 +108,7 @@ export function NutritionScreen({ token, currentUser, mode, onToggleTheme }: Pro
     if (!selectedMeal || !formName.trim()) { Alert.alert("Error", "Meal name is required"); return; }
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/${selectedMeal._id}`, {
+      const result = await apiRequest(`${API_URL}/${selectedMeal._id}`, {
         method: "PATCH",
         headers: authHeaders(token),
         body: JSON.stringify({
@@ -119,11 +120,9 @@ export function NutritionScreen({ token, currentUser, mode, onToggleTheme }: Pro
           date: formDate,
         }),
       });
-      const contentType = res.headers.get("content-type") || "";
-      const data = contentType.includes("application/json") ? await res.json() : null;
-      if (res.ok) setSubView("list");
-      else if (res.status === 404) Alert.alert("Error", "Nutrition API is not available on this backend yet.");
-      else Alert.alert("Error", data?.error || "Failed to update meal");
+      if (result.ok) setSubView("list");
+      else if (result.status === 404) Alert.alert("Error", "Nutrition API is not available on this backend yet.");
+      else Alert.alert("Error", result.error || "Failed to update meal");
     } catch (error) {
       Alert.alert("Error", "Could not connect to server");
     } finally {
@@ -133,19 +132,17 @@ export function NutritionScreen({ token, currentUser, mode, onToggleTheme }: Pro
 
   const handleDelete = async (m: Meal) => {
     try {
-      const res = await fetch(`${API_URL}/${m._id}`, {
+      const result = await apiRequest(`${API_URL}/${m._id}`, {
         method: "DELETE",
         headers: authHeaders(token),
       });
-      if (res.ok) {
+      if (result.ok) {
         setMeals((prev) => prev.filter((item) => item._id !== m._id));
         setSelectedMeal(null);
         setSubView("list");
       } else {
-        const contentType = res.headers.get("content-type") || "";
-        const data = contentType.includes("application/json") ? await res.json() : null;
-        if (res.status === 404) Alert.alert("Error", "Nutrition API is not available on this backend yet.");
-        else Alert.alert("Error", data?.error || "Failed to delete");
+        if (result.status === 404) Alert.alert("Error", "Nutrition API is not available on this backend yet.");
+        else Alert.alert("Error", result.error || "Failed to delete");
       }
     } catch (error) {
       Alert.alert("Error", "Could not connect to server");

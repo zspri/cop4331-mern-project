@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import { AUTH_API_URL } from "../config/api";
+import { apiRequest } from "../config/http";
 import type { ThemeColors } from "../theme/colors";
 
 type Props = {
@@ -47,7 +48,7 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
     setLoginError("");
     setLoading(true);
     try {
-      const response = await fetch(`${AUTH_API_URL}/login`, {
+      const result = await apiRequest<{ user: any; token: string; error?: string }>(`${AUTH_API_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -55,18 +56,17 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
         body: JSON.stringify({ email, password })
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 403 || data.error?.toLowerCase().includes("verify")) {
+      if (!result.ok) {
+        const errorMessage = result.error || "Login failed";
+        if (result.status === 403 || errorMessage.toLowerCase().includes("verify")) {
           setUnverifiedEmail(email);
           throw new Error("Please verify your email before logging in.");
         }
-        throw new Error(data.error || "Login failed");
+        throw new Error(errorMessage);
       }
 
       Alert.alert("Success", "Logged in successfully!");
-      onLoginSuccess(data.user, data.token);
+      onLoginSuccess(result.data!.user, result.data!.token);
     } catch (error: any) {
       setLoginError(error.message || "Invalid Email or Password");
     } finally {
@@ -78,13 +78,12 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
     if (!unverifiedEmail) return;
     setResendLoading(true);
     try {
-      const response = await fetch(`${AUTH_API_URL}/resend-verification`, {
+      const result = await apiRequest(`${AUTH_API_URL}/resend-verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: unverifiedEmail })
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to resend verification email");
+      if (!result.ok) throw new Error(result.error || "Failed to resend verification email");
       Alert.alert("Sent", "A new verification email has been sent. Please check your inbox.");
     } catch (error: any) {
       Alert.alert("Error", error.message || "Failed to resend the verification email.");

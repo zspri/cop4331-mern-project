@@ -4,6 +4,8 @@ Expo React Native frontend for auth, dashboard, workouts, and nutrition workflow
 
 Default API target: hosted backend at https://cop4331mern.zachspri.ng
 
+For the presentation, the safest plan is to keep the emulator and the web demo pointed at the same hosted API or droplet-backed API endpoint so the client path is consistent.
+
 ## Platform Targets
 
 - Android emulator/device
@@ -55,6 +57,16 @@ npm run start:hosted
 
 This is the safest demo path when you do not want to run backend locally.
 
+If your web demo is deployed to a droplet/domain, use that hosted backend for the presentation and keep the emulator pointed at the same API.
+
+For the most production-like demo runtime (fewer dev-only overlays and faster interaction after bundle):
+
+```bash
+cd mobile-app
+npm install
+npm run start:demo
+```
+
 ### Option B: Local backend mode (for backend debugging)
 
 1. Start backend first:
@@ -95,7 +107,9 @@ Examples:
 Notes:
 
 - The app defaults to hosted API when EXPO_PUBLIC_API_BASE_URL is not provided.
+- On Android, EXPO_PUBLIC_API_BASE_URL values using localhost/127.0.0.1/::1 are auto-mapped to 10.0.2.2.
 - If you still see transport errors, explicitly set EXPO_PUBLIC_API_BASE_URL and restart Expo.
+- For demo day, prefer a single hosted API endpoint for both the emulator and web demo rather than mixing hosted and local backends.
 
 ## Scripts
 
@@ -103,10 +117,24 @@ Notes:
 npm run start
 npm run start:hosted
 npm run start:local
+npm run start:demo
+npm run start:demo:local
 npm run android
 npm run ios
 npm run web
+npm run verify
 ```
+
+## Pre-Demo Fast Verification
+
+Run this once before presenting:
+
+```bash
+cd mobile-app
+npm run verify
+```
+
+This runs TypeScript checks and Expo doctor checks to catch configuration regressions before launch.
 
 ## Project Layout
 

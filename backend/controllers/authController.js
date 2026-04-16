@@ -20,6 +20,10 @@ const getBackendBaseUrl = () => {
     return process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`;
 };
 
+const canBypassEmailVerification = () => {
+    return process.env.NODE_ENV !== 'production' && process.env.DISABLE_EMAIL_VERIFICATION_FALLBACK !== 'true';
+};
+
 // @desc Register user
 // @route POST /api/auth/register
 // @access Public
@@ -67,7 +71,32 @@ const registerUser = async (req, res) => {
             <p>This link will expire in 24 hours.</p>
         `;
 
-        await sendEmail(user.email, 'Verify your email address', html);
+        try {
+            await sendEmail(user.email, 'Verify your email address', html);
+        } catch (error) {
+            const message = typeof error?.message === 'string' ? error.message : '';
+            const missingEmailConfig = message.includes('Email service is not configured');
+
+            if (missingEmailConfig && canBypassEmailVerification()) {
+                user.isVerified = true;
+                user.verificationToken = null;
+                user.verificationTokenExpires = null;
+                await user.save();
+
+                return res.status(201).json({
+                    message: 'User registered successfully. Email verification is disabled in this environment.',
+                    user: {
+                        id: user._id,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        email: user.email,
+                        isVerified: user.isVerified,
+                    },
+                });
+            }
+
+            throw error;
+        }
 
         res.status(201).json({
             message: 'User registered successfully. Please check your email to verify your account before logging in.',
@@ -275,7 +304,8 @@ const forgotPassword = async (req, res) => {
 // @access Public
 const resetPassword = async (req, res) => {
     try {
-        const { pin, password } = req.body;
+        const { token } = req.params;
+        const { password } = req.body;
 
         if (!password) {
             return res.status(400).json({ error: 'New password is required' });

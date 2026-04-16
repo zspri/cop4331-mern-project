@@ -22,7 +22,14 @@ export type WorkoutSubView = "list" | "add" | "edit" | "view" | "graph";
 
 export const API_URL = resolveApiEndpoint("");
 
-export const authHeaders = (token: string | null): Record<string, string> => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${token}`,
-});
+export const authHeaders = (token: string | null): Record<string, string> => {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+};

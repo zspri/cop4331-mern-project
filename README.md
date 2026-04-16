@@ -36,6 +36,11 @@ Backend-specific setup and route docs: backend/README.md
 - The nutrition tab depends on /api/meals.
 - Source is fixed in this repo, but any externally hosted backend must be rebuilt/redeployed to pick up the new route.
 
+### Demo Deployment Note
+
+- For the web demo, hosting the built web app and API behind a droplet/domain is the preferred presentation path.
+- Keep the mobile emulator pointed at the hosted API so the emulator flow matches the web demo backend and avoids local networking issues.
+
 ### Mobile App
 
 - Login/Register/Verify email screens
@@ -95,6 +100,8 @@ npm run start:hosted
 
 Use this mode for classroom demos when you want to avoid local backend startup.
 
+Recommended demo strategy: use the droplet-hosted web demo for the browser presentation, and use the Android emulator only as a client against the same hosted API.
+
 ### Mode A: Local Backend + Mobile Native (recommended for development)
 
 Terminal 1:
@@ -152,6 +159,7 @@ Use this section when you want the fastest safe command set by scenario.
 | Scenario | Terminal 1 | Terminal 2 | Result |
 | --- | --- | --- | --- |
 | Hosted API demo (no local backend) | `cd mobile-app && npm run start:hosted` | none | Expo mobile app talks to hosted API |
+| Droplet web demo | `docker compose up -d` on the droplet | none | Nginx serves the web build and proxies API traffic |
 | Native mobile dev (Android/iOS) | `cd backend && npm run dev` | `cd mobile-app && npx expo start -c` | Expo native app talks to local API |
 | Mobile web dev | `cd backend && npm run dev` | `cd mobile-app && set EXPO_PUBLIC_API_BASE_URL=http://localhost:5001 && npx expo start --web` | Expo web app talks to local API |
 | Docker web stack | `docker compose up -d` | none | Nginx serves web frontend and proxies /api |
@@ -162,6 +170,7 @@ Safety checks before login/signup testing:
 2. Ensure only one backend is bound to port 5001.
 3. For Android emulator, ensure API host resolves to `10.0.2.2` when backend runs on host machine.
 4. For hosted demos, confirm `https://cop4331mern.zachspri.ng/api/ping` before opening Expo.
+5. For droplet web demos, confirm the droplet domain responds before you launch the browser presentation.
 
 ## Verification Checklist
 

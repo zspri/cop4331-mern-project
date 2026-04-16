@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import { AUTH_API_URL } from "../config/api";
+import { apiRequest } from "../config/http";
 import type { ThemeColors } from "../theme/colors";
 
 type Props = {
@@ -31,14 +32,12 @@ export function VerifyEmailScreen({ onNavigate }: Props) {
 
     setLoading(true);
     try {
-      const response = await fetch(`${AUTH_API_URL}/verify-email/${token}`, {
+      const result = await apiRequest(`${AUTH_API_URL}/verify-email/${token}`, {
         method: "GET"
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to verify email");
+      if (!result.ok) {
+        throw new Error(result.error || "Failed to verify email");
       }
 
       Alert.alert("Success", "Email verified successfully! You can now log in.", [
