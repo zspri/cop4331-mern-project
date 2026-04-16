@@ -268,24 +268,20 @@ const forgotPassword = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetToken = crypto.randomInt(100000, 1000000).toString();
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
 
         await user.save();
 
-        const resetUrl = `${getBackendBaseUrl()}/api/auth/reset-password/${resetToken}`;
-
         const html = `
             <h2>Password Reset</h2>
             <p>Hello ${user.firstName},</p>
-            <p>Click the link below to reset your password:</p>
+            <p>Enter the following PIN to reset your password:</p>
             <p>
-                <a href="${resetUrl}" target="_blank">
-                    Reset Password
-                </a>
+                ${resetToken}
             </p>
-            <p>This link will expire in 15 minutes.</p>
+            <p>This PIN will expire in 15 minutes.</p>
         `;
 
         await sendEmail(user.email, 'Reset your password', html);
@@ -304,8 +300,7 @@ const forgotPassword = async (req, res) => {
 // @access Public
 const resetPassword = async (req, res) => {
     try {
-        const { token } = req.params;
-        const { password } = req.body;
+        const { password, token } = req.body;
 
         if (!password) {
             return res.status(400).json({ error: 'New password is required' });

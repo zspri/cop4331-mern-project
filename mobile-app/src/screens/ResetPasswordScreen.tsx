@@ -49,7 +49,7 @@ export function ResetPasswordScreen({ onNavigate }: Props) {
       const response = await fetch(`${AUTH_API_URL}/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: pin.trim(), password })
+        body: JSON.stringify({ token: parseInt(pin.trim()), password })
       });
 
       const data = await response.json();
