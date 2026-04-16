@@ -16,7 +16,7 @@ import { apiRequest } from "../config/http";
 import type { ThemeColors } from "../theme/colors";
 
 type Props = {
-  onNavigate: (screen: "login" | "register" | "verify") => void;
+  onNavigate: (screen: "login" | "register" | "verify" | "forgot-password" | "reset-password") => void;
 };
 
 export function RegisterScreen({ onNavigate }: Props) {

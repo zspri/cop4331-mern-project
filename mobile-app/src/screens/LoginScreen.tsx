@@ -16,7 +16,7 @@ import { apiRequest } from "../config/http";
 import type { ThemeColors } from "../theme/colors";
 
 type Props = {
-  onNavigate: (screen: "login" | "register" | "verify") => void;
+  onNavigate: (screen: "login" | "register" | "verify" | "forgot-password" | "reset-password") => void;
   onLoginSuccess: (user: any, token: string) => void;
 };
 
@@ -170,6 +170,13 @@ export function LoginScreen({ onNavigate, onLoginSuccess }: Props) {
                 )}
               </Pressable>
             )}
+
+            <Pressable
+              style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}
+              onPress={() => onNavigate("forgot-password")}
+            >
+              <Text style={styles.link}>Forgot your password?</Text>
+            </Pressable>
 
             <Pressable
               style={({ hovered, pressed }: any) => [styles.linkButton, (hovered || pressed) && styles.linkButtonInteractive]}

@@ -3,16 +3,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { Platform, Pressable, SafeAreaView, StyleSheet, Text, View, useWindowDimensions, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
+import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
 import { NutritionScreen } from "./src/screens/NutritionScreen";
 import { RegisterScreen } from "./src/screens/RegisterScreen";
+import { ResetPasswordScreen } from "./src/screens/ResetPasswordScreen";
 import { VerifyEmailScreen } from "./src/screens/VerifyEmailScreen";
 import { WorkoutsScreen } from "./src/screens/WorkoutsScreen";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import type { ThemeColors, ThemeMode } from "./src/theme/colors";
 
 type Tab = "dashboard" | "workouts" | "nutrition";
-type AuthScreen = "login" | "register" | "verify";
+type AuthScreen = "login" | "register" | "verify" | "forgot-password" | "reset-password";
 
 const SESSION_STATE_KEY = "mm_session_state";
 
@@ -116,7 +118,13 @@ function AppContent() {
         if (parsed.tab === "dashboard" || parsed.tab === "workouts" || parsed.tab === "nutrition") {
           setTab(parsed.tab);
         }
-        if (parsed.authScreen === "login" || parsed.authScreen === "register" || parsed.authScreen === "verify") {
+        if (
+          parsed.authScreen === "login" ||
+          parsed.authScreen === "register" ||
+          parsed.authScreen === "verify" ||
+          parsed.authScreen === "forgot-password" ||
+          parsed.authScreen === "reset-password"
+        ) {
           setAuthScreen(parsed.authScreen);
         }
         if (typeof parsed.isAuthenticated === "boolean") {
@@ -196,6 +204,10 @@ function AppContent() {
         return <RegisterScreen onNavigate={setAuthScreen} />;
       case "verify":
         return <VerifyEmailScreen onNavigate={setAuthScreen} />;
+      case "forgot-password":
+        return <ForgotPasswordScreen onNavigate={setAuthScreen} />;
+      case "reset-password":
+        return <ResetPasswordScreen onNavigate={setAuthScreen} />;
       default:
         return <LoginScreen onNavigate={setAuthScreen} onLoginSuccess={() => {}} />;
     }
